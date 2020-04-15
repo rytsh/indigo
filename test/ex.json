@@ -1,0 +1,29 @@
+{
+    "users": [
+        {
+            "name": "yasin",
+            "age": "1"
+        },
+        {
+            "name": "selin",
+            "age": "2"
+        },
+        {
+            "name": "eray",
+            "age": "5"
+        },
+        {
+            "name": "ali",
+            "age": "3"
+        },
+        {
+            "name": "sinem",
+            "age": "2"
+        }
+    ],
+    "post": [
+        {
+            "date": "Wed Apr 15 17:04:14 +03 2020"
+        }
+    ]
+}
