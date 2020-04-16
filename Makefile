@@ -23,6 +23,7 @@ build: clean $(PLATFORMS)
 	@echo "> Buiding gojson for $@"
 	@mkdir -p $(GOBIN)/$@
 	GOOS=$@ GOARCH=amd64 go build $(LDFLAGS) -o $(GOBIN)/$@ $(MAINGO)
+	cd out/$@ && zip gojson-$@-amd64-$(VERSION).zip *
 
 clean:
 	@echo "> Cleaning builded files..."
