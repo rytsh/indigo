@@ -21,7 +21,7 @@ func generalHandle(val interface{}) http.HandlerFunc {
 func Parse(all map[string]interface{}) {
 	for path, val := range all {
 		fmt.Println(path)
-		http.HandleFunc(fmt.Sprintf("/%s", path), generalHandle(val))
+		http.HandleFunc(fmt.Sprintf("/%s", strings.ToLower(path)), generalHandle(val))
 	}
 }
 
@@ -34,6 +34,7 @@ func Serve(host string, port string) {
 func logRequest(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		r.URL.Path = strings.TrimSuffix(r.URL.Path, "/")
+		r.URL.Path = strings.ToLower(r.URL.Path)
 		log.Printf("%s %s\n", r.Method, r.URL)
 		handler.ServeHTTP(w, r)
 	})
