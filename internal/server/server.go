@@ -6,6 +6,7 @@ import (
 	"gojson/internal/common"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func generalHandle(val interface{}) http.HandlerFunc {
@@ -32,6 +33,7 @@ func Serve(host string, port string) {
 
 func logRequest(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.URL.Path = strings.TrimSuffix(r.URL.Path, "/")
 		log.Printf("%s %s\n", r.Method, r.URL)
 		handler.ServeHTTP(w, r)
 	})
