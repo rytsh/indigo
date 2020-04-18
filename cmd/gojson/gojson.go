@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -24,7 +26,10 @@ Options:
   -v, --version
     Show version number
   -h, --help
-    Show help
+	Show help
+
+  Examples:
+	gojson db.json
 `
 
 func usage() {
@@ -61,7 +66,11 @@ func signalCheck() {
 	go func() {
 		<-sigs
 		fmt.Println(`Byeee..`)
-		os.Exit(1)
+		if err := server.SRV.Shutdown(context.Background()); err != nil {
+			// Error from closing listeners, or context timeout:
+			log.Printf("HTTP server Shutdown: %v", err)
+		}
+		server.Close()
 	}()
 }
 
@@ -79,9 +88,18 @@ func main() {
 		os.Exit(2)
 	}
 
-	fmt.Printf("http://%s:%s\n", flagHost, flagPort)
-	fmt.Println("__Resources__")
-	server.Parse(reader.ReadJSON(filePath[0]))
+	fmt.Println(common.Intro)
+	fmt.Printf("\033[90mLoading %s\033[0m\n", filePath[0])
+	resList := server.SetHandle(reader.ReadJSON(filePath[0]))
+	fmt.Println("\033[90mDone\033[0m")
 
+	home := fmt.Sprintf("http://%s:%s", flagHost, flagPort)
+	fmt.Println("\n\033[1mResources\033[0m")
+	for _, val := range resList {
+		fmt.Printf("%s/%s\n", home, val)
+	}
+
+	fmt.Println("\n\033[1mHome\033[0m")
+	fmt.Printf("%s\n\n", home)
 	server.Serve(flagHost, flagPort)
 }
