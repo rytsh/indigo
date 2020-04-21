@@ -12,6 +12,8 @@ gojson hold all data in memory.
   Set host
 ```
 
+s + enter will create a snapshot of the db on a new file.
+
 ## Build
 
 Run `make` to build listed platforms or just specify `make windows`
@@ -19,8 +21,6 @@ Run `make` to build listed platforms or just specify `make windows`
 ---
 
 ## Examples
-
-This server is a case insensitive.
 
 Run the server
 
@@ -45,12 +45,12 @@ curl http://localhost:3000/UsErS
 Append a new data to field
 
 ```shell
-curl -d '{"name":"ea","age":100}' -X POST -H 'Content-Type: application/json' http://localhost:3000/users/
+curl -d '{"name":"ea","age":100}' -X POST http://localhost:3000/users/
 
 curl http://localhost:3000/users
 [{"age":"2","id":2,"name":"selin"},{"age":"5","id":"xx","name":"eray"},{"age":"3","id":4,"name":"ali"},{"age":"2","id":5,"name":"sinem"},{"age":100,"name":"ea"}]
 
-curl -d '[{"name":"XYZ","age":10000}]' -X POST -H 'Content-Type: application/json' http://localhost:3000/userS/
+curl -d '[{"name":"XYZ","age":10000}]' -X POST http://localhost:3000/userS/
 
 curl http://localhost:3000/users
 [{"age":"2","id":2,"name":"selin"},{"age":"5","id":"xx","name":"eray"},{"age":"3","id":4,"name":"ali"},{"age":"2","id":5,"name":"sinem"},{"age":100,"name":"ea"},[{"age":10000,"name":"XYZ"}]]
@@ -59,13 +59,13 @@ curl http://localhost:3000/users
 
 ### Put data
 
-You can not delete it or put again this content beacuse you didn't pass an id field! Because auto id algorithm doesn't exist.
+You can not delete it or put again this content because you didn't pass an id field! Auto id algorithm doesn't exist.
 
 ```shell
 curl http://localhost:3000/users
 [{"age":"2","id":2,"name":"selin"},{"age":"5","id":"xx","name":"eray"},{"age":"3","id":4,"name":"ali"},{"age":"2","id":5,"name":"sinem"}]
 
-curl -d '{"id":100,"name":"selin","age":100}' -X PUT -H 'Content-Type: application/json' http://localhost:3000/userS/2
+curl -d '{"id":100,"name":"selin","age":100}' -X PUT http://localhost:3000/userS/2
 
 curl http://localhost:3000/users
 [{"age":100,"id":100,"name":"selin"},{"age":"5","id":"xx","name":"eray"},{"age":"3","id":4,"name":"ali"},{"age":"2","id":5,"name":"sinem"}
@@ -73,7 +73,7 @@ curl http://localhost:3000/users
 
 ### Delete data
 
-You can delete with id field, warning without it it will flush data. (is it good?)
+You can delete with id field. __Warning__ without it it will flush data. (is it good?)
 
 ```shell
 curl http://localhost:3000/test

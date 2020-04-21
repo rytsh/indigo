@@ -16,7 +16,7 @@ var mux = &RegexpHandler{}
 
 var idleConnsClosed = make(chan struct{})
 
-func generalHandle(val interface{}) http.HandlerFunc {
+func generalHandle(val interface{}, path string) http.HandlerFunc {
 	// TODO: index id
 	// indexData := make(map[string]int)
 	// for i, value := range val.([]interface{}) {
@@ -29,6 +29,8 @@ func generalHandle(val interface{}) http.HandlerFunc {
 	// 	}
 	// 	indexData[s] = i
 	// }
+
+	reader.All[path] = &val
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -69,12 +71,12 @@ func generalHandle(val interface{}) http.HandlerFunc {
 }
 
 // SetHandle generate handle URL's and seperate data
-func SetHandle(all map[string]interface{}) []string {
+func SetHandle() []string {
 	resList := make([]string, 0)
-	for path, val := range all {
+	for path, val := range reader.All {
 		resList = append(resList, path)
 		reg, _ := regexp.Compile(fmt.Sprintf("(?i)/%s(([/]+.*)*)$", path))
-		mux.HandleFunc(reg, generalHandle(val))
+		mux.HandleFunc(reg, generalHandle(val, path))
 	}
 	// set Home
 	reg, _ := regexp.Compile("^/$")

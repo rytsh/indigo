@@ -90,7 +90,8 @@ func main() {
 
 	fmt.Println(common.Intro)
 	fmt.Printf("\033[90mLoading %s\033[0m\n", filePath[0])
-	resList := server.SetHandle(reader.ReadJSON(filePath[0]))
+	reader.ReadJSON(filePath[0])
+	resList := server.SetHandle()
 	fmt.Println("\033[90mDone\033[0m")
 
 	home := fmt.Sprintf("http://%s:%s", flagHost, flagPort)
@@ -100,6 +101,9 @@ func main() {
 	}
 
 	fmt.Println("\n\033[1mHome\033[0m")
-	fmt.Printf("%s\n\n", home)
+	fmt.Println(home)
+
+	go reader.ReadKey()
+
 	server.Serve(flagHost, flagPort)
 }

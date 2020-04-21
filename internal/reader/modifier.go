@@ -46,6 +46,7 @@ func PostHandle(val *interface{}, urlPath string, body io.ReadCloser) error {
 	if json.Unmarshal(buf.Bytes(), &dat1) != nil {
 		if json.Unmarshal(buf.Bytes(), &dat1[0]) != nil {
 			// data is not a JSON
+			log.Println("This is not a json data")
 			dat1[0] = buf.String()
 		}
 		*val = append((*val).([]interface{}), dat1[0])
