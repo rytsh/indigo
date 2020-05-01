@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strings"
+	"time"
 )
 
 // SRV is a general http server
@@ -16,56 +18,55 @@ var mux = &RegexpHandler{}
 
 var idleConnsClosed = make(chan struct{})
 
-func generalHandle(val interface{}, path string) http.HandlerFunc {
+func generalHandle(val *interface{}, path string) http.HandlerFunc {
 	// TODO: index id
-	// indexData := make(map[string]int)
-	// for i, value := range val.([]interface{}) {
-	// 	var s string
-	// 	switch v := value.(map[string]interface{})["id"].(type) {
-	// 	case string:
-	// 		s = v
-	// 	default:
-	// 		s = fmt.Sprintf("%v", v)
-	// 	}
-	// 	indexData[s] = i
-	// }
-
-	reader.All[path] = &val
+	// reader.All[path] = &val
 
 	return func(w http.ResponseWriter, r *http.Request) {
+		// set return type
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		// trim end of dangling slash chars
+		r.URL.Path = common.TrimSuffixAll(r.URL.Path, '/')
+		// get inner url
+		rVal, rAVal, rAIndex, err := reader.GoInner(val, strings.Split(r.URL.Path, "/")[2:])
+		if err != nil {
+			fmt.Fprintf(w, err.Error())
+			return
+		}
+
 		switch r.Method {
 		case http.MethodGet:
-			result, err := reader.GetHandle(&val, r.URL.Path)
+			result, err := reader.GetHandle(rVal)
 			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
 				fmt.Fprintf(w, err.Error())
 			} else {
 				w.Write(result)
 			}
-
 		case http.MethodPost:
-			err := reader.PostHandle(&val, r.URL.Path, r.Body)
+			err := reader.PostHandle(rVal, r.Body)
 			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
 				fmt.Fprintf(w, err.Error())
 			} else {
 				fmt.Fprintf(w, "{}")
 			}
 		case http.MethodPut:
-			err := reader.PutHandle(&val, r.URL.Path, r.Body)
+			err := reader.PutHandle(rVal, r.Body)
 			if err != nil {
 				fmt.Fprintf(w, err.Error())
 			} else {
 				fmt.Fprintf(w, "{}")
 			}
 		case http.MethodDelete:
-			err := reader.DeleteHandle(&val, r.URL.Path)
+			err := reader.DeleteHandle(rVal, rAVal, rAIndex)
 			if err != nil {
 				fmt.Fprintf(w, err.Error())
 			} else {
 				fmt.Fprintf(w, "{}")
 			}
 		default:
-			fmt.Fprintf(w, "GET, POST, PUT, DELETE supported!")
+			fmt.Fprintf(w, `{"err": "GET, POST, PUT, DELETE supported!"`)
 		}
 	}
 }
@@ -93,8 +94,9 @@ func home() http.HandlerFunc {
 
 func logRequest(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("%s %s\n", r.Method, r.URL)
+		start := time.Now()
 		handler.ServeHTTP(w, r)
+		log.Printf("%s %s %v us\n", r.Method, r.URL, time.Since(start).Microseconds())
 	})
 }
 

@@ -1,7 +1,10 @@
 <p align="center"><img src="doc/assets/logo.png" width="50%"/></p>
 
-Serve given json file with first child URL seperation, this is a very basic json-server but can run on any json file.  
+Serve given json file with first child URL seperation but you can get or post data even most inner object, this is a very basic json-server but can run on any json file.
+
 gojson hold all data in memory.
+
+Add an `id` field when PUT, POST. gojson not put an auto-id so you can not delete it or put again this content. `id` field help us to find data in array but if you working with object not problem go on.
 
 ## Useful options
 
@@ -30,66 +33,76 @@ gojson test/ex.json
 
 ### Get Data
 
-Get whole list or an item with id field
+Get whole list or an item.
 
 ```shell
-curl http://localhost:3000/UsErS
-[{"age":"2","id":2,"name":"selin"},{"age":"5","id":"xx","name":"eray"},{"age":"3","id":4,"name":"ali"},{"age":"2","id":5,"name":"sinem"}]
+curl http://localhost:3000/inner
+[{"data":[{"id":11,"name":"11-inner"}],"id":1},{"data":[{"abc":{"value":5},"id":2,"name":"2-inner"}],"id":2}]
 
- curl http://localhost:3000/users/2
-{"age":"2","id":2,"name":"selin"}
+curl http://localhost:3000/inner/1
+{"data":[{"id":11,"name":"11-inner"}],"id":1}
+
+curl http://localhost:3000/inner/1/data/11
+{"id":11,"name":"11-inner"}
+
+curl http://localhost:3000/inner/1/data/11/name
+"11-inner"
 ```
 
 ### Post data
 
-Append a new data to field
+Append a new data to field. Post location should be an array.
 
 ```shell
+ curl http://localhost:3000/users/
+[{"age":"2","id":2,"name":"selin"},{"age":"5","id":"xx","name":"eray"},{"age":"3","id":4,"name":"ali"},{"age":"2","id":5,"name":"sinem"}]
+
 curl -d '{"name":"ea","age":100}' -X POST http://localhost:3000/users/
 
-curl http://localhost:3000/users
+curl http://localhost:3000/users/
 [{"age":"2","id":2,"name":"selin"},{"age":"5","id":"xx","name":"eray"},{"age":"3","id":4,"name":"ali"},{"age":"2","id":5,"name":"sinem"},{"age":100,"name":"ea"}]
 
-curl -d '[{"name":"XYZ","age":10000}]' -X POST http://localhost:3000/userS/
+# You can add to inner
+curl http://localhost:3000/inner
+[{"data":[{"id":11,"name":"11-inner"}],"id":1},{"data":[{"abc":{"value":5},"id":2,"name":"2-inner"}],"id":2}]
 
-curl http://localhost:3000/users
-[{"age":"2","id":2,"name":"selin"},{"age":"5","id":"xx","name":"eray"},{"age":"3","id":4,"name":"ali"},{"age":"2","id":5,"name":"sinem"},{"age":100,"name":"ea"},[{"age":10000,"name":"XYZ"}]]
+curl -d '{"value":"Coool"}' -X POST http://localhost:3000/inner/1/data
 
+curl http://localhost:3000/inner
+[{"data":[{"id":11,"name":"11-inner"},{"value":"Coool"}],"id":1},{"data":[{"abc":{"value":5},"id":2,"name":"2-inner"}],"id":2}]
 ```
 
 ### Put data
 
-You can not delete it or put again this content because you didn't pass an id field! Auto id algorithm doesn't exist.
+You can send PUT request everywhere.
 
 ```shell
-curl http://localhost:3000/users
-[{"age":"2","id":2,"name":"selin"},{"age":"5","id":"xx","name":"eray"},{"age":"3","id":4,"name":"ali"},{"age":"2","id":5,"name":"sinem"}]
+curl http://localhost:3000/inner
+[{"data":[{"id":11,"name":"11-inner"}],"id":1},{"data":[{"abc":{"value":5},"id":2,"name":"2-inner"}],"id":2}]
 
-curl -d '{"id":100,"name":"selin","age":100}' -X PUT http://localhost:3000/userS/2
+curl -d '{"data": [{"id": 100, "x":"abc"}]}' -X PUT http://localhost:3000/inner/2/data/2/abc
 
-curl http://localhost:3000/users
-[{"age":100,"id":100,"name":"selin"},{"age":"5","id":"xx","name":"eray"},{"age":"3","id":4,"name":"ali"},{"age":"2","id":5,"name":"sinem"}
+curl http://localhost:3000/inner
+[{"data":[{"id":11,"name":"11-inner"}],"id":1},{"data":[{"abc":{"data":[{"id":100,"x":"abc"}]},"id":2,"name":"2-inner"}],"id":2}]
 ```
 
 ### Delete data
 
-You can delete with id field. __Warning__ without it it will flush data. (is it good?)
+If you want to delete an array it will set an empty array. Other values set to null.
 
 ```shell
-curl http://localhost:3000/test
-[{"date":"Wed Apr 15 17:04:14 +03 2020","id":1},{"age":107,"id":2,"name":"AAAA"}]
+curl http://localhost:3000/inner
+[{"data":[{"id":11,"name":"11-inner"}],"id":1},{"data":[{"abc":{"value":5},"id":2,"name":"2-inner"}],"id":2}]
 
-curl -X DELETE http://localhost:3000/test/2
-{}
+curl -X DELETE http://localhost:3000/inner/1/data
 
-curl http://localhost:3000/test
-[{"date":"Wed Apr 15 17:04:14 +03 2020","id":1}]
+curl http://localhost:3000/inner
+[{"data":[],"id":1},{"data":[{"abc":{"value":5},"id":2,"name":"2-inner"}],"id":2}]
 
-curl -X DELETE http://localhost:3000/test
-{}
+curl -X DELETE http://localhost:3000/inner/2/data/2/abc
 
-curl http://localhost:3000/test
-[]
+curl http://localhost:3000/inner
+[{"data":[],"id":1},{"data":[{"abc":null,"id":2,"name":"2-inner"}],"id":2}]
 ```
 
 ## License

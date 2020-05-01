@@ -7,113 +7,140 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"strings"
+	"reflect"
 )
 
-// GetHandle data with id or root path
-func GetHandle(val *interface{}, urlPath string) ([]byte, error) {
-	parsePath := strings.Split(urlPath, "/")
-	if len(parsePath) > 2 && parsePath[len(parsePath)-1] != "" {
-		for _, value := range (*val).([]interface{}) {
+// GoInner URL to data
+func GoInner(val *interface{}, urlPath []string) (*interface{}, *interface{}, int, error) {
+	if len(urlPath) >= 1 {
+		switch v := (*val).(type) {
+		case []interface{}:
 			var s string
-			switch v := value.(map[string]interface{})["id"].(type) {
-			case float64, float32, int:
-				s = fmt.Sprintf("%v", v)
-			case string:
-				s = v
-			}
+			for index, value := range v {
+				v := reflect.ValueOf(value)
+				if v.Kind() == reflect.Slice {
+					continue
+				}
+				switch vID := value.(map[string]interface{})["id"].(type) {
+				case *interface{}:
+					s = fmt.Sprintf("%v", *vID)
+				default:
+					s = fmt.Sprintf("%v", vID)
+				}
 
-			if s == parsePath[len(parsePath)-1] {
-				turnJ, _ := json.Marshal(value)
-				return turnJ, nil
+				if s == urlPath[0] {
+					if len(urlPath) == 1 {
+						return &(*val).([]interface{})[index], val, index, nil
+					}
+					return GoInner(&(*val).([]interface{})[index], urlPath[1:])
+				}
+			}
+		case map[string]interface{}:
+			// switch map value to pointer value
+			// Using for get address
+			if _, ok := v[urlPath[0]]; ok {
+				var tValP *interface{}
+				var tVal interface{}
+				switch vMap := (*val).(map[string]interface{})[urlPath[0]].(type) {
+				case *interface{}:
+					tValP = vMap
+				default:
+					tVal = vMap
+					(*val).(map[string]interface{})[urlPath[0]] = &tVal
+				}
+
+				if len(urlPath) == 1 {
+					if tValP != nil {
+						return tValP, nil, 0, nil
+					}
+					return &tVal, nil, 0, nil
+				}
+				if tValP != nil {
+					return GoInner(tValP, urlPath[1:])
+				}
+				return GoInner(&tVal, urlPath[1:])
 			}
 		}
 	} else {
-		turnJ, err := json.Marshal(*val)
-		if err != nil {
-			log.Println("ERRR")
-		}
-		return turnJ, err
+		return val, nil, 0, nil
 	}
-	return nil, errors.New("Not found")
+	return nil, nil, 0, errors.New(`{"err": "Not found!"}`)
+}
+
+// GetHandle data with id or root path
+func GetHandle(val *interface{}) ([]byte, error) {
+	turnJ, err := json.Marshal(val)
+	if err != nil {
+		log.Println("ERR: Cannot translate to JSON")
+	}
+	return turnJ, nil
 }
 
 // PostHandle to handle post value
-func PostHandle(val *interface{}, urlPath string, body io.ReadCloser) error {
-	dat1 := make([]interface{}, 1)
+func PostHandle(val *interface{}, body io.ReadCloser) error {
+	v := reflect.ValueOf(*val)
+	if v.Kind() != reflect.Slice {
+		msg := "Post location is not an array!"
+		log.Println(msg)
+		return fmt.Errorf(`{"err": "%s"}`, msg)
+	}
+	dat1 := make(map[string]interface{}, 1)
+	var dat2 interface{}
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(body)
 	if json.Unmarshal(buf.Bytes(), &dat1) != nil {
-		if json.Unmarshal(buf.Bytes(), &dat1[0]) != nil {
+		if json.Unmarshal(buf.Bytes(), &dat2) != nil {
 			// data is not a JSON
-			log.Println("This is not a json data")
-			dat1[0] = buf.String()
+			log.Println("This is not a json data!")
+			dat2 = buf.String()
+			*val = append((*val).([]interface{}), dat2)
+		} else {
+			*val = append((*val).([]interface{}), dat2)
 		}
-		*val = append((*val).([]interface{}), dat1[0])
 	} else {
 		*val = append((*val).([]interface{}), dat1)
 	}
-	// log.Println(dat1)
 	return nil
 }
 
-// PutHandle a new value with 'id'
-func PutHandle(val *interface{}, urlPath string, body io.ReadCloser) error {
-	parsePath := strings.Split(urlPath, "/")
-	if len(parsePath) > 2 && parsePath[len(parsePath)-1] != "" {
-		// find and change data
-		for i, value := range (*val).([]interface{}) {
-			var s string
-			switch v := value.(map[string]interface{})["id"].(type) {
-			case float64, float32, int:
-				s = fmt.Sprintf("%v", v)
-			case string:
-				s = v
-			}
-			if s == parsePath[len(parsePath)-1] {
-				dat1 := make([]interface{}, 1)
-				buf := new(bytes.Buffer)
-				buf.ReadFrom(body)
-				if json.Unmarshal(buf.Bytes(), &dat1) != nil {
-					if json.Unmarshal(buf.Bytes(), &dat1[0]) != nil {
-						// data is not a JSON
-						dat1[0] = buf.String()
-					}
-					(*val).([]interface{})[i] = dat1[0]
-				} else {
-					(*val).([]interface{})[i] = dat1
-				}
-				break
-			}
+// PutHandle switch data with new value
+func PutHandle(val *interface{}, body io.ReadCloser) error {
+	dat1 := make(map[string]interface{}, 1)
+	var dat2 interface{}
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(body)
+	if json.Unmarshal(buf.Bytes(), &dat1) != nil {
+		if json.Unmarshal(buf.Bytes(), &dat2) != nil {
+			// data is not a JSON
+			log.Println("This is not a json data!")
+			dat2 = buf.String()
+			*val = dat2
+		} else {
+			(*val) = dat2
 		}
+	} else {
+		(*val) = dat1
 	}
 
 	return nil
 }
 
-// DeleteHandle delete with id or all
-func DeleteHandle(val *interface{}, urlPath string) error {
-	parsePath := strings.Split(urlPath, "/")
-	if len(parsePath) > 2 && parsePath[len(parsePath)-1] != "" {
-		// find and delete
-		for i, value := range (*val).([]interface{}) {
-			var s string
-			switch v := value.(map[string]interface{})["id"].(type) {
-			case float64, float32, int:
-				s = fmt.Sprintf("%v", v)
-			case string:
-				s = v
-			}
-			if s == parsePath[len(parsePath)-1] {
-				array := (*val).([]interface{})
-				array[i] = array[len(array)-1]
-				array[len(array)-1] = ""
-				*val = array[:len(array)-1]
-				break
-			}
-		}
+// DeleteHandle with id or all
+func DeleteHandle(val *interface{}, aVal *interface{}, aIndex int) error {
+	if aVal != nil {
+		// if is an id
+		array := (*aVal).([]interface{})
+		array[aIndex] = array[len(array)-1]
+		*aVal = array[:len(array)-1]
 	} else {
-		*val = make([]interface{}, 0)
+		// if is an slice
+		v := reflect.ValueOf(*val)
+		if v.Kind() == reflect.Slice {
+			*val = make([]interface{}, 0)
+		} else {
+			// if is an other
+			*val = nil
+		}
 	}
 	return nil
 }

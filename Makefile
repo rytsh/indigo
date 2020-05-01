@@ -1,4 +1,4 @@
-export VERSION := v0.2.1
+export VERSION := v0.2.2
 export BINARY_NAME := gojson
 export PACKAGE_NAME := gojson
 
