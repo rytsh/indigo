@@ -11,7 +11,7 @@ import (
 )
 
 // All is data
-var All map[string]*interface{}
+var All interface{}
 var fPath string
 
 // ReadJSON read json file from path and return map

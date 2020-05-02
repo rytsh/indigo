@@ -20,6 +20,30 @@ func TestTrimSuffixAll(t *testing.T) {
 			},
 			want: "http://localhost:3000/test/1",
 		},
+		{
+			name: "Trim Empty",
+			args: args{
+				val: "",
+				ch:  '/',
+			},
+			want: "",
+		},
+		{
+			name: "Trim One",
+			args: args{
+				val: "/",
+				ch:  '/',
+			},
+			want: "",
+		},
+		{
+			name: "Trim moree",
+			args: args{
+				val: "/////",
+				ch:  '/',
+			},
+			want: "",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

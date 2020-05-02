@@ -11,7 +11,7 @@ import (
 )
 
 // GoInner URL to data
-func GoInner(val *interface{}, urlPath []string) (*interface{}, *interface{}, int, error) {
+func GoInner(val *interface{}, urlPath []string) (*interface{}, *interface{}, interface{}, error) {
 	if len(urlPath) >= 1 {
 		switch v := (*val).(type) {
 		case []interface{}:
@@ -51,10 +51,11 @@ func GoInner(val *interface{}, urlPath []string) (*interface{}, *interface{}, in
 
 				if len(urlPath) == 1 {
 					if tValP != nil {
-						return tValP, nil, 0, nil
+						return tValP, val, urlPath[0], nil
 					}
-					return &tVal, nil, 0, nil
+					return &tVal, val, urlPath[0], nil
 				}
+				// urlPath more than 1
 				if tValP != nil {
 					return GoInner(tValP, urlPath[1:])
 				}
@@ -62,6 +63,7 @@ func GoInner(val *interface{}, urlPath []string) (*interface{}, *interface{}, in
 			}
 		}
 	} else {
+		// urlpath zero
 		return val, nil, 0, nil
 	}
 	return nil, nil, 0, errors.New(`{"err": "Not found!"}`)
@@ -91,7 +93,7 @@ func PostHandle(val *interface{}, body io.ReadCloser) error {
 	if json.Unmarshal(buf.Bytes(), &dat1) != nil {
 		if json.Unmarshal(buf.Bytes(), &dat2) != nil {
 			// data is not a JSON
-			log.Println("This is not a json data!")
+			// log.Println("This is not a json data!")
 			dat2 = buf.String()
 			*val = append((*val).([]interface{}), dat2)
 		} else {
@@ -112,7 +114,7 @@ func PutHandle(val *interface{}, body io.ReadCloser) error {
 	if json.Unmarshal(buf.Bytes(), &dat1) != nil {
 		if json.Unmarshal(buf.Bytes(), &dat2) != nil {
 			// data is not a JSON
-			log.Println("This is not a json data!")
+			// log.Println("This is not a json data!")
 			dat2 = buf.String()
 			*val = dat2
 		} else {
@@ -125,20 +127,50 @@ func PutHandle(val *interface{}, body io.ReadCloser) error {
 	return nil
 }
 
+// PatchHandle combine data with new value
+func PatchHandle(val *interface{}, body io.ReadCloser) error {
+	v := reflect.ValueOf(*val)
+	if v.Kind() != reflect.Map {
+		msg := "Patch location is not an object!"
+		return fmt.Errorf(`{"err": "%s"}`, msg)
+	}
+	dat1 := make(map[string]interface{}, 1)
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(body)
+	if json.Unmarshal(buf.Bytes(), &dat1) != nil {
+		msg := "Patch value should be an object!"
+		return fmt.Errorf(`{"err": "%s"}`, msg)
+	}
+
+	for key := range dat1 {
+		(*val).(map[string]interface{})[key] = dat1[key]
+	}
+
+	return nil
+}
+
 // DeleteHandle with id or all
-func DeleteHandle(val *interface{}, aVal *interface{}, aIndex int) error {
+func DeleteHandle(val *interface{}, aVal *interface{}, aIndex interface{}) error {
 	if aVal != nil {
-		// if is an id
-		array := (*aVal).([]interface{})
-		array[aIndex] = array[len(array)-1]
-		*aVal = array[:len(array)-1]
-	} else {
-		// if is an slice
-		v := reflect.ValueOf(*val)
+		v := reflect.ValueOf(*aVal)
 		if v.Kind() == reflect.Slice {
-			*val = make([]interface{}, 0)
+			array := (*aVal).([]interface{})
+			if len(array) != 0 {
+				array[aIndex.(int)] = array[len(array)-1]
+				*aVal = array[:len(array)-1]
+			}
 		} else {
-			// if is an other
+			delete((*aVal).(map[string]interface{}), aIndex.(string))
+		}
+	} else {
+		// Editing home path will create a new empty value
+		v := reflect.ValueOf(*val)
+		switch v.Kind() {
+		case reflect.Slice:
+			*val = make([]interface{}, 0)
+		case reflect.Map:
+			*val = make(map[string]interface{}, 0)
+		default:
 			*val = nil
 		}
 	}

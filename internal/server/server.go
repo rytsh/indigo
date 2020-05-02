@@ -18,9 +18,8 @@ var mux = &RegexpHandler{}
 
 var idleConnsClosed = make(chan struct{})
 
-func generalHandle(val *interface{}, path string) http.HandlerFunc {
+func generalHandle(val *interface{}) http.HandlerFunc {
 	// TODO: index id
-	// reader.All[path] = &val
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		// set return type
@@ -28,20 +27,30 @@ func generalHandle(val *interface{}, path string) http.HandlerFunc {
 		// trim end of dangling slash chars
 		r.URL.Path = common.TrimSuffixAll(r.URL.Path, '/')
 		// get inner url
-		rVal, rAVal, rAIndex, err := reader.GoInner(val, strings.Split(r.URL.Path, "/")[2:])
+		rVal, rAVal, rAIndex, err := reader.GoInner(val, strings.Split(r.URL.Path, "/")[1:])
 		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
 			fmt.Fprintf(w, err.Error())
 			return
 		}
 
+		successMsg := `{"msg":"success"}`
 		switch r.Method {
 		case http.MethodGet:
-			result, err := reader.GetHandle(rVal)
-			if err != nil {
-				w.WriteHeader(http.StatusBadRequest)
-				fmt.Fprintf(w, err.Error())
+			if r.URL.Path == "" {
+				// Welcome home
+				// TODO: add an UI webcontente
+				w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+				fmt.Fprintf(w, common.GetInfo())
 			} else {
-				w.Write(result)
+				result, err := reader.GetHandle(rVal)
+				if err != nil {
+					w.WriteHeader(http.StatusBadRequest)
+					fmt.Fprintf(w, err.Error())
+				} else {
+					w.WriteHeader(http.StatusOK)
+					w.Write(result)
+				}
 			}
 		case http.MethodPost:
 			err := reader.PostHandle(rVal, r.Body)
@@ -49,47 +58,47 @@ func generalHandle(val *interface{}, path string) http.HandlerFunc {
 				w.WriteHeader(http.StatusBadRequest)
 				fmt.Fprintf(w, err.Error())
 			} else {
-				fmt.Fprintf(w, "{}")
+				w.WriteHeader(http.StatusOK)
+				fmt.Fprintf(w, successMsg)
 			}
 		case http.MethodPut:
 			err := reader.PutHandle(rVal, r.Body)
 			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
 				fmt.Fprintf(w, err.Error())
 			} else {
-				fmt.Fprintf(w, "{}")
+				w.WriteHeader(http.StatusOK)
+				fmt.Fprintf(w, successMsg)
+			}
+		case http.MethodPatch:
+			err := reader.PatchHandle(rVal, r.Body)
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				fmt.Fprintf(w, err.Error())
+			} else {
+				w.WriteHeader(http.StatusOK)
+				fmt.Fprintf(w, successMsg)
 			}
 		case http.MethodDelete:
 			err := reader.DeleteHandle(rVal, rAVal, rAIndex)
 			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
 				fmt.Fprintf(w, err.Error())
 			} else {
-				fmt.Fprintf(w, "{}")
+				w.WriteHeader(http.StatusOK)
+				fmt.Fprintf(w, successMsg)
 			}
 		default:
-			fmt.Fprintf(w, `{"err": "GET, POST, PUT, DELETE supported!"`)
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintf(w, `{"err": "GET, POST, PUT, PATCH, DELETE supported!"`)
 		}
 	}
 }
 
-// SetHandle generate handle URL's and seperate data
-func SetHandle() []string {
-	resList := make([]string, 0)
-	for path, val := range reader.All {
-		resList = append(resList, path)
-		reg, _ := regexp.Compile(fmt.Sprintf("(?i)/%s(([/]+.*)*)$", path))
-		mux.HandleFunc(reg, generalHandle(val, path))
-	}
-	// set Home
-	reg, _ := regexp.Compile("^/$")
-	mux.HandleFunc(reg, home())
-	return resList
-}
-
-func home() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		fmt.Fprintf(w, common.GetInfo())
-	}
+// SetHandle generate handle URL's
+func SetHandle() {
+	reg, _ := regexp.Compile("(?i)/.*(([/]+.*)*)$")
+	mux.HandleFunc(reg, generalHandle(&reader.All))
 }
 
 func logRequest(handler http.Handler) http.Handler {

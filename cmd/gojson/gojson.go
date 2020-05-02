@@ -21,7 +21,7 @@ Options:
   --port <3000>
     Set port
   --host <localhost>
-    Set host
+	Set host
 
   -v, --version
     Show version number
@@ -38,8 +38,8 @@ func usage() {
 }
 
 var (
-	flagVersion        bool
-	flagPort, flagHost string
+	flagVersion, flagCase bool
+	flagPort, flagHost    string
 )
 
 func flagParse() []string {
@@ -77,7 +77,6 @@ func signalCheck() {
 func main() {
 	signalCheck()
 	filePath := flagParse()
-
 	if flagVersion {
 		fmt.Println(common.Version)
 		os.Exit(0)
@@ -91,14 +90,10 @@ func main() {
 	fmt.Println(common.Intro)
 	fmt.Printf("\033[90mLoading %s\033[0m\n", filePath[0])
 	reader.ReadJSON(filePath[0])
-	resList := server.SetHandle()
+	server.SetHandle()
 	fmt.Println("\033[90mDone\033[0m")
 
 	home := fmt.Sprintf("http://%s:%s", flagHost, flagPort)
-	fmt.Println("\n\033[1mResources\033[0m")
-	for _, val := range resList {
-		fmt.Printf("%s/%s\n", home, val)
-	}
 
 	fmt.Println("\n\033[1mHome\033[0m")
 	fmt.Println(home)

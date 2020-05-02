@@ -18,11 +18,11 @@ var Version string = "v0.0"
 const info = `
 ___,___,_______,____
 |  :::|///-/||-||    \
-|  :::|//-//|| || J)  |
-|  :::|/-///|!-!|     |
-|   _______________   |
-|  |///////////////|  |
-|  |_______________|  |
+|  :::|//-//|| || J)  |   ## INFO ##
+|  :::|/-///|!-!|     |   - You can send POST, PUT, PATH, DELETE request to root path.
+|   _______________   |   - Root GET request reserved for UI support.
+|  |///////////////|  |   - In array reach value with 'id' field.
+|  |_______________|  |   - /test/ABC and /test/abc are act different.
 |  |____goJSON_____|  |
 |  |_______________|  |
 |  |%s| _|
