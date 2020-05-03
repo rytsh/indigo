@@ -1,6 +1,14 @@
-<p align="center"><img src="doc/assets/logo.png" width="50%"/></p>
+<img align="left" width="50%" src="doc/assets/logo.png"/>
 
-Serve given json file, you can GET, POST, PUT, PATCH or DELETE data even most inner object and root path. This is a very basic json-server but can run on any json file.
+[![Go Report Card](https://goreportcard.com/badge/github.com/rytsh/gojson?style=flat-square)](https://goreportcard.com/badge/github.com/rytsh/gojson)
+[![License](https://img.shields.io/github/license/rytsh/gojson?color=blue&style=flat-square)](https://raw.githubusercontent.com/rytsh/gojson/master/LICENSE)
+[![Discord](https://img.shields.io/discord/706631996478324898?style=flat-square)](https://discordapp.com/channels/706631996478324898)
+
+Serve any json file with GET, POST, PUT, PATCH or DELETE request data, even most inner object and root path.
+
+---
+
+## Notes
 
 gojson hold all data in memory and case sensetive like what you see in json file.
 
@@ -8,7 +16,7 @@ Add an `id` field when PUT, POST, PATCH if you working on an array. gojson not p
 PATCH location and data should be an object.  
 Root path's GET method reserved for UI but you can request other methods.
 
-## Useful options
+## Options
 
 ```txt
 --port <3000>
@@ -21,7 +29,8 @@ s + enter will create a snapshot of the db on a new file.
 
 ## Build
 
-Run `make` to build listed platforms or just specify `make windows`
+You can download binary form in release section.  
+Run `make` to build for major platforms or just specify `make windows`
 
 ---
 

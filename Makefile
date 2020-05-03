@@ -22,9 +22,22 @@ build: clean $(PLATFORMS)
 %:
 	@echo "> Buiding gojson for $@"
 	@mkdir -p $(GOBIN)/$@
-	GOOS=$@ GOARCH=amd64 go build $(LDFLAGS) -o $(GOBIN)/$@ $(MAINGO)
+	CGO_ENABLED=0 GOOS=$@ GOARCH=amd64 go build $(LDFLAGS) -o $(GOBIN)/$@ $(MAINGO)
 	cd out/$@ && zip gojson-$@-amd64-$(VERSION).zip *
 
 clean:
 	@echo "> Cleaning builded files..."
 	@-rm -rf $(GOBIN)/* 2> /dev/null
+
+test:
+	@echo "> Test started"
+	@CGO_ENABLED=0 go test -v ./...
+
+test-cover:
+	@echo "> Coverage started"
+	@CGO_ENABLED=0 go test -v ./... -coverprofile=./out/cover.out
+
+coveralls: test-cover
+	@goveralls -coverprofile=./out/cover.out -service=drone.io
+
+.PHONY: clean test test-cover coveralls

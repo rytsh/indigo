@@ -1,0 +1,11 @@
+kind: pipeline
+name: default
+
+steps:
+- name: test
+  image: ryts/go:1.14
+  environment:
+    COVERALLS_TOKEN:
+      from_secret: COVERALLS_TOKEN
+  commands:
+  - make coveralls
