@@ -1,14 +1,15 @@
 package server
 
 import (
+	"compress/gzip"
 	"fmt"
 	"gojson/internal/common"
 	"gojson/internal/reader"
+	"io"
 	"log"
 	"net/http"
 	"regexp"
 	"strings"
-	"time"
 )
 
 // SRV is a general http server
@@ -24,10 +25,16 @@ func generalHandle(val *interface{}) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// set return type
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		// trim end of dangling slash chars
-		r.URL.Path = common.TrimSuffixAll(r.URL.Path, '/')
+		// trim slash chars
+		r.URL.Path = "/" + strings.Trim(r.URL.Path, "/")
+		searchURL := strings.Trim(strings.TrimPrefix(r.URL.Path, "/"+common.API), "/")
+		// parse
+		var searchURLX []string
+		if searchURL != "" {
+			searchURLX = strings.Split(searchURL, "/")
+		}
 		// get inner url
-		rVal, rAVal, rAIndex, err := reader.GoInner(val, strings.Split(r.URL.Path, "/")[1:])
+		rVal, rAVal, rAIndex, err := reader.GoInner(val, searchURLX)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			fmt.Fprintf(w, err.Error())
@@ -37,7 +44,7 @@ func generalHandle(val *interface{}) http.HandlerFunc {
 		successMsg := `{"msg":"success"}`
 		switch r.Method {
 		case http.MethodGet:
-			if r.URL.Path == "" {
+			if r.URL.Path == "/"+common.API {
 				// Welcome home
 				// TODO: add an UI webcontente
 				w.Header().Set("Content-Type", "text/plain; charset=utf-8")
@@ -97,15 +104,58 @@ func generalHandle(val *interface{}) http.HandlerFunc {
 
 // SetHandle generate handle URL's
 func SetHandle() {
-	reg, _ := regexp.Compile("(?i)/.*(([/]+.*)*)$")
+	// Serve API
+	reg, _ := regexp.Compile(fmt.Sprintf("(?i)/%s.*(([/]+.*)*)$", common.API))
 	mux.HandleFunc(reg, generalHandle(&reader.All))
+
+	// Serve Static Folder
+	if common.StaticFolder != "" {
+		reg, _ = regexp.Compile("(?i)/.*$")
+		fs := http.FileServer(http.Dir(common.StaticFolder))
+		mux.Handler(reg, fs)
+	}
+}
+
+// Gzip Compression
+type gzipResponseWriter struct {
+	io.Writer
+	http.ResponseWriter
+}
+
+func (w gzipResponseWriter) Write(b []byte) (int, error) {
+	return w.Writer.Write(b)
 }
 
 func logRequest(handler http.Handler) http.Handler {
+	authUserPass := strings.Split(common.AuthBasic, ":")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		handler.ServeHTTP(w, r)
-		log.Printf("%s %s %v us\n", r.Method, r.URL, time.Since(start).Microseconds())
+		// Basic Auth
+		if len(authUserPass) > 1 {
+			w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
+
+			username, password, authOK := r.BasicAuth()
+			if authOK == false {
+				http.Error(w, "Not authorized", 401)
+				return
+			}
+
+			if username != authUserPass[0] || password != authUserPass[1] {
+				http.Error(w, "Not authorized", 401)
+				return
+			}
+		}
+		// End Basic Auth
+
+		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+			handler.ServeHTTP(w, r)
+		} else {
+			w.Header().Set("Content-Encoding", "gzip")
+			gz := gzip.NewWriter(w)
+			defer gz.Close()
+			gzw := gzipResponseWriter{Writer: gz, ResponseWriter: w}
+			handler.ServeHTTP(gzw, r)
+		}
+		log.Printf("- %s - %s %s\n", r.RemoteAddr[:strings.Index(r.RemoteAddr, ":")], r.Method, r.URL)
 	})
 }
 

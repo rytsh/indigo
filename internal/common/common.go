@@ -2,18 +2,29 @@ package common
 
 import (
 	"fmt"
+	"os"
 	"strings"
 )
 
-// Check the errors
-func Check(e error) {
-	if e != nil {
-		panic(e)
-	}
-}
-
 // Version number
 var Version string = "v0.0"
+
+// API path
+var API string = ""
+
+// StaticFolder path
+var StaticFolder string = ""
+
+// AuthBasic is username:password
+var AuthBasic string = ""
+
+// Intro text
+const Intro = `
+  _,          s     n
+ (_p>  g    j   o
+\<_)     o
+ ^^
+`
 
 const info = `
 ___,___,_______,____
@@ -44,8 +55,18 @@ func center(text string, fullSpace int) string {
 	return fmt.Sprintf("%s%s%s", left, text, right)
 }
 
-// Intro text
-const Intro = "  \033[93m_,\033[0m        s  n\n" +
-	"\033[93m(_p>\033[0m  g   j  o\n" +
-	"\033[93m\\<_)\033[0m     o\n" +
-	" \033[93m^^\033[0m"
+// Check the errors
+func Check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
+
+// FolderExists is check folder is exist
+func FolderExists(folderName string) bool {
+	info, err := os.Stat(folderName)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return info.IsDir()
+}

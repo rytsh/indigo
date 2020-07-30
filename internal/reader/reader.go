@@ -12,24 +12,32 @@ import (
 
 // All is data
 var All interface{}
-var fPath string
+
+// FPath hold path of file
+var FPath string = "data.json"
 
 // ReadJSON read json file from path and return map
-func ReadJSON(filePath string) {
-	fPath = filePath
+func ReadJSON(filePath string) error {
+	FPath = filePath
 	dat, err := ioutil.ReadFile(filePath)
-	common.Check(err)
+	if err != nil {
+		return err
+	}
 
 	err = json.Unmarshal(dat, &All)
-	common.Check(err)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // SaveJSON file
 func SaveJSON() (string, error) {
 	jsonData, err := json.MarshalIndent(All, "", "  ")
 	common.Check(err)
-	fileExt := path.Ext(fPath)
-	fileName := strings.TrimSuffix(fPath, fileExt)
+	fileExt := path.Ext(FPath)
+	fileName := strings.TrimSuffix(FPath, fileExt)
 	for i := 1; ; i++ {
 		if _, err := os.Stat(fmt.Sprintf("%s%d.json", fileName, i)); os.IsNotExist(err) {
 			fileName = fmt.Sprintf("%s%d.json", fileName, i)

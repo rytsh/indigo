@@ -1,4 +1,4 @@
-export VERSION := v0.2.3
+export VERSION := v0.3.0
 export BINARY_NAME := gojson
 export PACKAGE_NAME := gojson
 
@@ -9,7 +9,7 @@ BASE_DIR := $(shell pwd)
 GOBIN := $(BASE_DIR)/out
 MAINGO := $(BASE_DIR)/cmd/gojson/gojson.go
 
-PLATFORMS := windows linux darwin
+PLATFORMS := $(shell [[ -z "${PLATFORM}" ]] && echo windows linux darwin || echo ${PLATFORM} )
 # Use linker flags to provide version/build settings
 LDFLAGS=-ldflags "-s -w -X gojson/internal/common.Version=$(VERSION)"
 
@@ -22,12 +22,16 @@ build: clean $(PLATFORMS)
 %:
 	@echo "> Buiding gojson for $@"
 	@mkdir -p $(GOBIN)/$@
-	CGO_ENABLED=0 GOOS=$@ GOARCH=amd64 go build $(LDFLAGS) -o $(GOBIN)/$@ $(MAINGO)
+	CGO_ENABLED=0 GOOS=$@ GOARCH=amd64 go build -trimpath $(LDFLAGS) -o $(GOBIN)/$@ $(MAINGO)
 	cd out/$@ && zip gojson-$@-amd64-$(VERSION).zip *
 
 clean:
 	@echo "> Cleaning builded files..."
 	@-rm -rf $(GOBIN)/* 2> /dev/null
+
+cleanf: clean
+	@echo "> Cleaning cache..."
+	go clean
 
 test:
 	@echo "> Test started"
@@ -40,4 +44,4 @@ test-cover:
 coveralls: test-cover
 	@goveralls -coverprofile=./out/cover.out -service=drone.io
 
-.PHONY: clean test test-cover coveralls
+.PHONY: clean cleanf test test-cover coveralls

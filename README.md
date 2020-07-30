@@ -15,14 +15,35 @@ gojson hold all data in memory and case sensetive like what you see in json file
 Add an `id` field when PUT, POST, PATCH if you working on an array. gojson not put an auto-id. `id` field help us to find data in array.  
 PATCH location and data should be an object.  
 Root path's GET method reserved for UI but you can request other methods.
+I will add more useful stuff in it and write test cases. If you see any error or wants to support something write me.
 
 ## Options
 
 ```txt
---port <3000>
-  Set port
---host <localhost>
-  Set host
+  --port, -P <3000>
+    Set port, tool default is '3000'
+  --host, -H <localhost>
+    Set host, tool default is 'localhost'
+
+  --empty <data.json>
+    If not given any json file, this is the save location
+    Tool default is 'data.json'
+  --api <api>
+    Start API url with this string
+  --folder <./public>
+    Serve folder
+    if api option is empty, auto set 'api'
+
+  --auth-basic <username:password>
+    Enable basic authentication with username and password
+
+  --no-color
+    Disable color output
+
+  -v, --version
+    Show version number
+  -h, --help
+    Show help
 ```
 
 s + enter will create a snapshot of the db on a new file.
@@ -30,17 +51,23 @@ s + enter will create a snapshot of the db on a new file.
 ## Build
 
 You can download binary form in release section.  
-Run `make` to build for major platforms or just specify `make windows`
+Run `make` to build for major platforms or just specify `PLATFORM=windows make`
 
 ---
 
 ## Examples
 
-Run the server
+Run the server, if you not give any json file it will start with null content.
 
 ```shell
+# gojson --api api/v1 --folder /server/public --auth-basic user:pass db.json
+# You can use above but I just start with json
 gojson test/ex.json
 ```
+
+<details><summary>Show example requests</summary>
+
+Gzip compress can usable with `Accept-Encoding: gzip` header set.
 
 ### Get Data
 
@@ -136,6 +163,12 @@ curl http://localhost:3000/inner
 [{"id":1}]
 ```
 
+</details>
+
 ## License
 
 gojson is [MIT licensed](./LICENSE).
+
+### Libraries Used
+
+[github.com/fatih/color](https://github.com/fatih/color)

@@ -164,15 +164,7 @@ func DeleteHandle(val *interface{}, aVal *interface{}, aIndex interface{}) error
 		}
 	} else {
 		// Editing home path will create a new empty value
-		v := reflect.ValueOf(*val)
-		switch v.Kind() {
-		case reflect.Slice:
-			*val = make([]interface{}, 0)
-		case reflect.Map:
-			*val = make(map[string]interface{}, 0)
-		default:
-			*val = nil
-		}
+		*val = nil
 	}
 	return nil
 }
