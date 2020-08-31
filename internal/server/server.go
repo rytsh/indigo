@@ -103,17 +103,24 @@ func generalHandle(val *interface{}) http.HandlerFunc {
 }
 
 // SetHandle generate handle URL's
-func SetHandle() {
+func SetHandle() error {
 	// Serve API
-	reg, _ := regexp.Compile(fmt.Sprintf("(?i)/%s.*(([/]+.*)*)$", common.API))
-	mux.HandleFunc(reg, generalHandle(&reader.All))
+	if common.NoAPI == false {
+		reg, _ := regexp.Compile(fmt.Sprintf("(?i)/%s.*(([/]+.*)*)$", common.API))
+		mux.HandleFunc(reg, generalHandle(&reader.All))
+	}
 
 	// Serve Static Folder
 	if common.StaticFolder != "" {
-		reg, _ = regexp.Compile("(?i)/.*$")
+		reg, _ := regexp.Compile("(?i)/.*$")
 		fs := http.FileServer(http.Dir(common.StaticFolder))
 		mux.Handler(reg, fs)
 	}
+
+	if common.NoAPI && common.StaticFolder == "" {
+		return fmt.Errorf("Nothing to serve")
+	}
+	return nil
 }
 
 // Gzip Compression

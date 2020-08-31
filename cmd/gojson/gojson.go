@@ -15,7 +15,7 @@ import (
 	"gojson/internal/server"
 )
 
-const helpText = `gojson [OPTIONS] <source>
+const helpText = `gojson [OPTIONS] <source_or_URL>
 Generate RestAPI with JSON file and serve folder
 
 Options:
@@ -24,14 +24,15 @@ Options:
   --host, -H <localhost>
     Set host, tool default is 'localhost'
 
-  --empty <data.json>
-    If not given any json file, this is the save location
-    Tool default is 'data.json'
+  --location <./data.json>
+    Change save location
   --api <api>
     Start API url with this string
   --folder <./public>
     Serve folder
     if api option is empty, auto set 'api'
+  --no-api
+    Close API server, use just serve folder
 
   --auth-basic <username:password>
     Enable basic authentication with username and password
@@ -69,12 +70,14 @@ func flagParse() []string {
 	flag.StringVar(&flagHost, "host", "localhost", "")
 	flag.StringVar(&flagHost, "H", "localhost", "")
 
-	flag.StringVar(&reader.FPath, "empty", "data.json", "")
+	flag.StringVar(&reader.FPath, "location", "", "")
 	flag.StringVar(&common.API, "api", "", "")
 	flag.StringVar(&common.StaticFolder, "folder", "", "")
 	flag.StringVar(&common.AuthBasic, "auth-basic", "", "")
+	// flag.Var(&common.Proxy, "proxy", "")
 
 	flag.BoolVar(&flagNoColor, "no-color", false, "")
+	flag.BoolVar(&common.NoAPI, "no-api", false, "")
 
 	flag.Parse()
 
@@ -139,21 +142,35 @@ func main() {
 
 	signalCheck()
 
-	if len(filePath) == 0 {
-		common.Color["Red"].Println("Not given a json file, using empty", reader.FPath)
-	} else {
-		common.Color["Magenta"].Println("Loading ", filePath[0])
-		if err := reader.ReadJSON(filePath[0]); err != nil {
-			common.ErrorPrintExit(err.Error(), 4)
+	if common.NoAPI == false {
+		if len(filePath) == 0 {
+			common.Color["Red"].Println("Not given a json file, using empty", reader.FPath)
+		} else {
+			common.Color["Magenta"].Println("Loading ", filePath[0])
+			var err error
+			if reader.IsURL(filePath[0]) {
+				err = reader.GetFile(filePath[0])
+			} else {
+				err = reader.ReadJSON(filePath[0])
+			}
+
+			if err != nil {
+				common.ErrorPrintExit(err.Error(), 4)
+			}
+
+			common.Color["Magenta"].Println("Done")
 		}
-		common.Color["Magenta"].Println("Done")
 	}
 
 	// Start Serve
-	server.SetHandle()
+	if err := server.SetHandle(); err != nil {
+		common.ErrorPrintExit(err.Error(), 5)
+	}
 
-	common.Color["Bold"].Println("API: ", reader.FPath)
-	common.Color["Yellow"].Printf("http://%s:%s/%s\n", flagHost, flagPort, common.API)
+	if common.NoAPI == false {
+		common.Color["Bold"].Println("API: ", reader.FPath)
+		common.Color["Yellow"].Printf("http://%s:%s/%s\n", flagHost, flagPort, common.API)
+	}
 	if common.StaticFolder != "" {
 		common.Color["Bold"].Println("Static Folder: ", common.StaticFolder)
 		common.Color["Yellow"].Printf("http://%s:%s\n", flagHost, flagPort)

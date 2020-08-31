@@ -15,12 +15,12 @@ type RegexpHandler struct {
 	routes []*route
 }
 
-// Handler is
+// Handler add routes with handler
 func (h *RegexpHandler) Handler(pattern *regexp.Regexp, handler http.Handler) {
 	h.routes = append(h.routes, &route{pattern, handler})
 }
 
-// HandleFunc is an
+// HandleFunc add routes with func
 func (h *RegexpHandler) HandleFunc(pattern *regexp.Regexp, handler func(http.ResponseWriter, *http.Request)) {
 	h.routes = append(h.routes, &route{pattern, http.HandlerFunc(handler)})
 }

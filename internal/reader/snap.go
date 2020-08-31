@@ -21,7 +21,7 @@ func ReadKey() {
 				common.Color["Error"].Print("\n", err)
 				common.Color["Reset"].Println("")
 			} else {
-				log.Println(common.Color["Green"].Sprint("Saved snapshot to " + fileName))
+				log.Println("Saved snapshot to", fileName)
 			}
 		}
 		catch = ""

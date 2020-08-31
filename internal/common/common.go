@@ -12,11 +12,31 @@ var Version string = "v0.0"
 // API path
 var API string = ""
 
+//NoAPI can close API
+var NoAPI bool = false
+
 // StaticFolder path
 var StaticFolder string = ""
 
 // AuthBasic is username:password
 var AuthBasic string = ""
+
+// array flag
+type arrayFlags []string
+
+func (i *arrayFlags) String() string {
+	return "Array Flags"
+}
+
+func (i *arrayFlags) Set(value string) error {
+	*i = append(*i, value)
+	return nil
+}
+
+// end
+
+// Proxy variables
+var Proxy arrayFlags
 
 // Intro text
 const Intro = `
