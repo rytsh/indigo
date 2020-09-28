@@ -1,4 +1,4 @@
-module gojson
+module indigo
 
 go 1.14
 

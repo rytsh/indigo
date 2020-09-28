@@ -10,12 +10,12 @@ import (
 	"strings"
 	"syscall"
 
-	"gojson/internal/common"
-	"gojson/internal/reader"
-	"gojson/internal/server"
+	"indigo/internal/common"
+	"indigo/internal/reader"
+	"indigo/internal/server"
 )
 
-const helpText = `gojson [OPTIONS] <source_or_URL>
+const helpText = `indigo [OPTIONS] <source_or_URL>
 Generate RestAPI with JSON file and serve folder
 
 Options:
@@ -46,7 +46,7 @@ Options:
     Show help
 
   Examples:
-    gojson --api api/v1 --folder /server/public --auth-basic user:pass db.json
+    indigo --api api/v1 --folder /server/public --auth-basic user:pass db.json
 `
 
 func usage() {

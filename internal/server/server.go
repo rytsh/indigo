@@ -3,8 +3,8 @@ package server
 import (
 	"compress/gzip"
 	"fmt"
-	"gojson/internal/common"
-	"gojson/internal/reader"
+	"indigo/internal/common"
+	"indigo/internal/reader"
 	"io"
 	"log"
 	"net/http"

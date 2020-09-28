@@ -3,7 +3,7 @@ package reader
 import (
 	"encoding/json"
 	"fmt"
-	"gojson/internal/common"
+	"indigo/internal/common"
 	"io/ioutil"
 	"net/http"
 	"net/url"

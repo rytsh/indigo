@@ -2,7 +2,7 @@ package reader
 
 import (
 	"fmt"
-	"gojson/internal/common"
+	"indigo/internal/common"
 	"log"
 	"strings"
 )

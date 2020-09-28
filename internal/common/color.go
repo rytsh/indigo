@@ -24,7 +24,7 @@ var Color = map[string]*color.Color{
 
 // PrintIntro is printing Intro
 func PrintIntro() {
-	Color["Bold"].Print(Intro)
+	Color["Bold"].Println(Intro)
 }
 
 // DisableColor for without color output

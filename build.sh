@@ -8,9 +8,9 @@
 
 BASE_DIR="$(realpath $(dirname "$0"))"
 OUTPUT_FOLDER="${BASE_DIR}/out"
-VERSION="$(git describe --tags)"
-MAINGO="${BASE_DIR}/cmd/gojson/gojson.go"
-FLAG_V="gojson/internal/common.Version=${VERSION}"
+VERSION="$(git describe --tags --abbrev=0)"
+MAINGO="${BASE_DIR}/cmd/indigo/indigo.go"
+FLAG_V="indigo/internal/common.Version=${VERSION}"
 
 function usage() {
     cat - <<EOF
@@ -19,6 +19,8 @@ Set PLATFORMS env variable to export
 PLATFORMS="windows linux darwin" is default
 Usage: $0 <OPTIONS>
 OPTIONS:
+  --run
+    Run for dev
   --build
     Build application to various platforms
   --clean
@@ -40,16 +42,16 @@ EOF
 #######################
 # Functions
 function build() {
-    echo "> Buiding gojson for ${1}"
+    echo "> Buiding indigo for ${1}"
     OUTPUT_FOLDER_IN=${OUTPUT_FOLDER}/${1}
     mkdir -p ${OUTPUT_FOLDER_IN}
     CGO_ENABLED=0 GOOS=${1} GOARCH=amd64 go build -trimpath -ldflags="-s -w -X ${FLAG_V}" -o ${OUTPUT_FOLDER_IN} ${MAINGO}
     (
 	    cd ${OUTPUT_FOLDER_IN}
         if [[ "${1}" == "windows" ]]; then
-            zip ../gojson-${1}-amd64-${VERSION}.zip *
+            zip ../indigo-${1}-amd64-${VERSION}.zip *
         else
-            tar czf ../gojson-${1}-amd64-${VERSION}.tar.gz *
+            tar czf ../indigo-${1}-amd64-${VERSION}.tar.gz *
         fi
     )
 }
@@ -65,6 +67,10 @@ fi
 
 while [[ "$#" -gt 0 ]]; do
     case "${1}" in
+    --run)
+        go run cmd/indigo/indigo.go test/ex.json
+        exit 0
+        ;;
     --build)
         BUILD="Y"
         shift 1

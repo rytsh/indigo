@@ -1,7 +1,7 @@
-<img align="left" width="50%" src="doc/assets/logo.png"/>
+![indigo logo](doc/assets/logo.png)
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/rytsh/gojson?style=flat-square)](https://goreportcard.com/badge/github.com/rytsh/gojson)
-[![License](https://img.shields.io/github/license/rytsh/gojson?color=blue&style=flat-square)](https://raw.githubusercontent.com/rytsh/gojson/master/LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/rytsh/indigo?style=flat-square)](https://goreportcard.com/badge/github.com/rytsh/indigo)
+[![License](https://img.shields.io/github/license/rytsh/indigo?color=blue&style=flat-square)](https://raw.githubusercontent.com/rytsh/indigo/master/LICENSE)
 [![Discord](https://img.shields.io/discord/706631996478324898?style=flat-square)](https://discordapp.com/channels/706631996478324898)
 
 Serve any json file with GET, POST, PUT, PATCH or DELETE request data, even most inner object and root path.
@@ -10,9 +10,9 @@ Serve any json file with GET, POST, PUT, PATCH or DELETE request data, even most
 
 ## Notes
 
-gojson hold all data in memory and case sensetive like what you see in json file.
+Indigo hold all data in memory and case sensetive like what you see in json file.
 
-Add an `id` field when PUT, POST, PATCH if you working on an array. gojson not put an auto-id. `id` field help us to find data in array.  
+Add an `id` field when PUT, POST, PATCH if you working on an array. indigo not put an auto-id. `id` field help us to find data in array.  
 PATCH location and data should be an object.  
 Root path's GET method reserved for UI but you can request other methods.
 I will add more useful stuff in it and write test cases. If you see any error or wants to support something write me.
@@ -60,9 +60,9 @@ Run `make` to build for major platforms or just specify `PLATFORM=windows make`
 Run the server, if you not give any json file it will start with null content.
 
 ```shell
-# gojson --api api/v1 --folder /server/public --auth-basic user:pass db.json
+# indigo --api api/v1 --folder /server/public --auth-basic user:pass db.json
 # You can use above but I just start with json
-gojson test/ex.json
+indigo test/ex.json
 ```
 
 <details><summary>Show example requests</summary>
@@ -167,7 +167,7 @@ curl http://localhost:3000/inner
 
 ## License
 
-gojson is [MIT licensed](./LICENSE).
+Indigo is [MIT licensed](./LICENSE).
 
 ### Libraries Used
 
