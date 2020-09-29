@@ -84,11 +84,13 @@ while [[ "$#" -gt 0 ]]; do
         shift 1
         ;;
     --cover)
-        COVERAGE="-coverprofile=${OUTPUT_FOLDER}/cover.out"
+        COVER="Y"
         shift 1
         ;;
     --coveralls)
         COVERALLS="Y"
+        TEST="Y"
+        COVER="Y"
         shift 1
         ;;
     -h | --help)
@@ -104,22 +106,31 @@ done
 
 cd $BASE_DIR
 
+# Clean output folder
 if [[ "${CLEAN}" == "Y" ]]; then
     echo "> Cleaning builded files..."
 	rm -rf ${OUTPUT_FOLDER}/* 2> /dev/null
 fi
 
+# Test
+if [[ "${TEST}" == "Y" ]]; then
+    echo "> Test started"
+    [[ "${COVER}" == "Y" ]] && COVERAGE="-coverprofile=${OUTPUT_FOLDER}/cover.out"
+	CGO_ENABLED=0 go test -v ./... ${COVERAGE}
+fi
+
+# Send to coveralls
+if [[ "${COVERALLS}" == "Y" ]]; then
+    echo "> Coveralls Test started"
+    goveralls -coverprofile=./out/cover.out -service=drone.io
+fi
+
+# Build packages
 if [[ "${BUILD}" == "Y" ]]; then
     mkdir -p ${OUTPUT_FOLDER}
     for PLATFORM in ${PLATFORMS}; do
         build ${PLATFORM}
     done
-elif [[ "${TEST}" == "Y" ]]; then
-    echo "> Test started"
-	CGO_ENABLED=0 go test -v ./... ${COVERAGE}
-elif [[ "${COVERALLS}" == "Y" ]]; then
-    echo "> Coveralls Test started"
-    goveralls -coverprofile=./out/cover.out -service=drone.io
 fi
 
 ###############

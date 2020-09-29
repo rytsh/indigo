@@ -1,4 +1,5 @@
 out/*
 test/ex?*.json
+data-*.json
 
 !out/.gitkeep

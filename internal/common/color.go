@@ -22,11 +22,6 @@ var Color = map[string]*color.Color{
 	"Reset": color.New(color.Reset),
 }
 
-// PrintIntro is printing Intro
-func PrintIntro() {
-	Color["Bold"].Println(Intro)
-}
-
 // DisableColor for without color output
 func DisableColor() {
 	color.NoColor = true

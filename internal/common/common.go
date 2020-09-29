@@ -46,7 +46,7 @@ const Intro = `
  ###   #   #####  #   ###      ###  ###  ###           ###      ### 
  ###   #     ######   ###      ###  ###  ###     ##### ###      ### 
  ###   #       ####   ###     ###   ###   ###     ###   ###    ###  
-##### ###        ##  ###########   #####   ########       ######    
+##### ###        ##  ###########   #####   ########        %s
 `
 
 const info = `
@@ -62,6 +62,11 @@ ___,___,_______,____
 |  |%s| _|
 |__|_______________| _|
 `
+
+// PrintIntro is printing Intro
+func PrintIntro() {
+	Color["Bold"].Printf(Intro, Version)
+}
 
 // GetInfo use for homepage
 func GetInfo() string {
