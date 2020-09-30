@@ -1,6 +1,6 @@
 ![indigo logo](doc/assets/logo.png)
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/rytsh/indigo?style=flat-square)](https://goreportcard.com/badge/github.com/rytsh/indigo)
+[![Go Report Card](https://goreportcard.com/badge/github.com/rytsh/indigo?style=flat-square)](https://goreportcard.com/report/github.com/rytsh/indigo)
 [![License](https://img.shields.io/github/license/rytsh/indigo?color=blue&style=flat-square)](https://raw.githubusercontent.com/rytsh/indigo/master/LICENSE)
 [![Discord](https://img.shields.io/discord/706631996478324898?style=flat-square)](https://discordapp.com/channels/706631996478324898)
 
