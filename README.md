@@ -66,10 +66,10 @@ Run the server, if you not give any json file it will start with null content.
 indigo test/ex.json
 ```
 
-Or run in docker
+Or run in docker ([dockerhub](https://hub.docker.com/r/ryts/indigo))
 
 ```shell
-docker run --rm -it -p 3000:3000 docker.pkg.github.com/rytsh/indigo/indigo:latest https://api.punkapi.com/v2/beers/1
+docker run --rm -it -p 3000:3000 ryts/indigo:latest https://api.punkapi.com/v2/beers/1
 ```
 
 <details><summary>Show example requests</summary>

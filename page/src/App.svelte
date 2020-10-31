@@ -21,7 +21,7 @@
 	<hr/>
 
 	<p>Run in docker</p>
-	<Code code="docker run --rm -it -p 3000:3000 docker.pkg.github.com/rytsh/indigo/indigo:latest https://api.punkapi.com/v2/beers/1/"/>
+	<Code code="docker run --rm -it -p 3000:3000 ryts/indigo:latest https://api.punkapi.com/v2/beers/1/"/>
 
 </main>
 
