@@ -61,8 +61,15 @@ Run the server, if you not give any json file it will start with null content.
 
 ```shell
 # indigo --api api/v1 --folder /server/public --auth-basic user:pass db.json
-# You can use above but I just start with json
+# I just start with json now
+# You can give url for json file
 indigo test/ex.json
+```
+
+Or run in docker
+
+```shell
+docker run --rm -it -p 3000:3000 docker.pkg.github.com/rytsh/indigo/indigo:latest https://api.punkapi.com/v2/beers/1
 ```
 
 <details><summary>Show example requests</summary>
