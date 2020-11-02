@@ -2,11 +2,13 @@
 
 #######################
 # Build and Test script
-# Copyright 2020 <rytsh@devusage.com>
-# All rights reserved. MIT license
+# Eray Ates <rytsh@devusage.com>
+# MIT license
 #######################
 
 BASE_DIR="$(realpath $(dirname "$0"))"
+cd $BASE_DIR
+
 OUTPUT_FOLDER="${BASE_DIR}/out"
 VERSION="$(git describe --tags --abbrev=0)"
 MAINGO="${BASE_DIR}/cmd/indigo/indigo.go"
@@ -17,6 +19,7 @@ function usage() {
 Build script for golang
 Set PLATFORMS env variable to export
 PLATFORMS="windows linux darwin" is default
+ARCHS="amd64" is default
 Usage: $0 <OPTIONS>
 OPTIONS:
   --run
@@ -30,6 +33,12 @@ OPTIONS:
     Test code
     --cover
       Export coverage of test
+
+  --publish-page
+    Publish page directory in gh-pages branch
+
+  --build-docker
+    Build docker image and publish to docker hub
 
   --coveralls
     Run coveralls tool
@@ -45,13 +54,13 @@ function build() {
     echo "> Buiding indigo for ${1}"
     OUTPUT_FOLDER_IN=${OUTPUT_FOLDER}/${1}
     mkdir -p ${OUTPUT_FOLDER_IN}
-    CGO_ENABLED=0 GOOS=${1} GOARCH=amd64 go build -trimpath -ldflags="-s -w -X ${FLAG_V}" -o ${OUTPUT_FOLDER_IN} ${MAINGO}
+    CGO_ENABLED=0 GOOS=${1} GOARCH=${2} go build -trimpath -ldflags="-s -w -X ${FLAG_V}" -o ${OUTPUT_FOLDER_IN} ${MAINGO}
     (
 	    cd ${OUTPUT_FOLDER_IN}
         if [[ "${1}" == "windows" ]]; then
-            zip ../indigo-${1}-amd64-${VERSION}.zip *
+            zip ../indigo-${1}-${2}-${VERSION}.zip *
         else
-            tar czf ../indigo-${1}-amd64-${VERSION}.tar.gz *
+            tar czf ../indigo-${1}-${2}-${VERSION}.tar.gz *
         fi
     )
 }
@@ -65,10 +74,17 @@ if [[ -z ${PLATFORMS} ]]; then
     PLATFORMS="windows linux darwin"
 fi
 
+if [[ -z ${ARCHS} ]]; then
+    ARCHS="amd64"
+fi
+
 while [[ "$#" -gt 0 ]]; do
     case "${1}" in
     --run)
-        go run cmd/indigo/indigo.go test/ex.json
+        set -x
+        shift 1
+        go run cmd/indigo/indigo.go ${*}
+        set +x
         exit 0
         ;;
     --build)
@@ -77,6 +93,14 @@ while [[ "$#" -gt 0 ]]; do
         ;;
     --clean)
         CLEAN="Y"
+        shift 1
+        ;;
+    --publish-page)
+        PUBLISH_PAGE="Y"
+        shift 1
+        ;;
+    --build-docker)
+        PUBLISH_DOCKER="Y"
         shift 1
         ;;
     --test)
@@ -104,8 +128,6 @@ while [[ "$#" -gt 0 ]]; do
     esac
 done
 
-cd $BASE_DIR
-
 # Clean output folder
 if [[ "${CLEAN}" == "Y" ]]; then
     echo "> Cleaning builded files..."
@@ -127,11 +149,31 @@ fi
 
 # Build packages
 if [[ "${BUILD}" == "Y" ]]; then
+    set -e
     mkdir -p ${OUTPUT_FOLDER}
     for PLATFORM in ${PLATFORMS}; do
-        build ${PLATFORM}
+        for ARCH in ${ARCHS}; do
+            build ${PLATFORM} ${ARCH}
+        done
     done
+    set +e
 fi
 
+# Publish Page
+if [[ "${PUBLISH_PAGE}" == "Y" ]]; then
+    (
+        cd page
+        echo "> Publish page started with ${VERSION}"
+        echo "LATEST_VERSION=${VERSION}" > .env
+        npm install && npm run build && npm run publish
+    )
+fi
+
+# Publish Docker
+if [[ "${BUILD_DOCKER}" == "Y" ]]; then
+    echo "> Build docker ${VERSION}"
+    docker build -t ryts/indigo:${VERSION} --build-arg VERSION=${VERSION} -f ci/run/Dockerfile .
+    docker tag ryts/indigo:${VERSION} ryts/indigo:latest
+fi
 ###############
 # END

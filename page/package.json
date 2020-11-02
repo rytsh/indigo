@@ -1,5 +1,8 @@
 {
-  "name": "svelte-app",
+  "name": "indigo-page",
+  "description": "indigo documentation page",
+  "license": "MIT",
+  "private": true,
   "version": "1.0.0",
   "scripts": {
     "build": "rollup -c",

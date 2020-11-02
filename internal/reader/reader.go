@@ -17,13 +17,10 @@ var All interface{}
 
 // FPath hold path of file
 var FPath string
-var fPathDef = "data.json"
 
 // ReadJSON read json file from path and return map
 func ReadJSON(filePath string) error {
-	if FPath == "" {
-		FPath = filePath
-	}
+	FPath = filePath
 	dat, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return err
@@ -44,9 +41,6 @@ func RecordFile(dat []byte) error {
 func SaveJSON() (string, error) {
 	jsonData, err := json.MarshalIndent(All, "", "  ")
 	common.Check(err)
-	if FPath == "" {
-		FPath = fPathDef
-	}
 	fileExt := path.Ext(FPath)
 	fileName := strings.TrimSuffix(FPath, fileExt)
 	for i := 1; ; i++ {

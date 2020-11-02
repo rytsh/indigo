@@ -15,7 +15,7 @@ import (
 	"indigo/internal/server"
 )
 
-const helpText = `indigo [OPTIONS] <source_or_URL>
+const helpText = `indigo [OPTIONS] <file_or_URL>
 Generate RestAPI with JSON file and serve folder
 
 Options:
@@ -26,13 +26,21 @@ Options:
 
   --location <./data.json>
     Change save location
-  --api <api>
-    Start API url with this string
+  --api-path <api_url_path>
+    Set API path prefix
+  --ui-path <ui_url_path>
+    Set UI path default '/indigo'
+
   --folder <./public>
     Serve folder
-    if api option is empty, auto set 'api'
+      Add an --api-path to avoid mix
+  --folder-path <folder_path>
+    Set Folder path, works with folder option
+
   --no-api
     Close API server, use just serve folder
+  --no-ui
+    Close UI server
 
   --auth-basic <username:password>
     Enable basic authentication with username and password
@@ -46,7 +54,7 @@ Options:
     Show help
 
   Examples:
-    indigo --api api/v1 --folder /server/public --auth-basic user:pass db.json
+    indigo --api-path api/v1 --auth-basic user:pass test/users.json
 `
 
 func usage() {
@@ -55,8 +63,8 @@ func usage() {
 }
 
 var (
-	flagVersion, flagNoColor bool
-	flagPort, flagHost       string
+	flagVersion, flagNoColor                                                   bool
+	flagPort, flagHost, flagAPIPath, flagUIPath, flagFolderPath, flagAuthBasic string
 )
 
 func flagParse() []string {
@@ -70,14 +78,18 @@ func flagParse() []string {
 	flag.StringVar(&flagHost, "host", "localhost", "")
 	flag.StringVar(&flagHost, "H", "localhost", "")
 
-	flag.StringVar(&reader.FPath, "location", "", "")
-	flag.StringVar(&common.API, "api", "", "")
+	flag.StringVar(&reader.FPath, "location", "data.json", "")
+	flag.StringVar(&flagAPIPath, "api-path", "", "")
+	flag.StringVar(&flagUIPath, "ui-path", "indigo", "")
+	flag.StringVar(&flagFolderPath, "folder-path", "", "")
+
 	flag.StringVar(&common.StaticFolder, "folder", "", "")
-	flag.StringVar(&common.AuthBasic, "auth-basic", "", "")
+	flag.StringVar(&flagAuthBasic, "auth-basic", "", "")
 	// flag.Var(&common.Proxy, "proxy", "")
 
 	flag.BoolVar(&flagNoColor, "no-color", false, "")
 	flag.BoolVar(&common.NoAPI, "no-api", false, "")
+	flag.BoolVar(&common.NoUI, "no-ui", false, "")
 
 	flag.Parse()
 
@@ -87,15 +99,29 @@ func flagParse() []string {
 		os.Exit(0)
 	}
 
-	// color disable
+	// Color disable
 	if flagNoColor == true {
 		common.DisableColor()
 	}
 
-	// API Trim
-	common.API = strings.Trim(common.API, "/ ")
-	if common.StaticFolder != "" && common.API == "" {
-		common.API = "api"
+	// Set paths
+	common.SetURL(flagAPIPath, false, &common.APIPath)
+	common.SetURL(flagUIPath, false, &common.UIPath)
+	common.SetURL(flagFolderPath, false, &common.FolderPath)
+
+	// Check folder exist
+	if common.StaticFolder != "" && common.FolderExists(common.StaticFolder) == false {
+		common.ErrorPrintExit(common.StaticFolder+" folder not exist", 2)
+	}
+
+	// Check basic auth user-pass
+	if flagAuthBasic != "" {
+		if strings.Contains(flagAuthBasic, ":") == false {
+			common.ErrorPrintExit("auth-basic must contain ':'", 3)
+		} else {
+			tmpSplit := strings.Split(flagAuthBasic, ":")
+			common.AuthBasic = append(common.AuthBasic, tmpSplit[0], strings.Join(tmpSplit[1:], ""))
+		}
 	}
 
 	return flag.Args()
@@ -133,21 +159,16 @@ func main() {
 	filePath := flagParse()
 	common.PrintIntro()
 
-	if common.StaticFolder != "" && common.FolderExists(common.StaticFolder) == false {
-		common.ErrorPrintExit(common.StaticFolder+" folder not exist", 2)
-	}
-	if common.AuthBasic != "" && strings.Contains(common.AuthBasic, ":") == false {
-		common.ErrorPrintExit("auth-basic must contain ':'", 3)
-	}
-
 	signalCheck()
 
+	// Read file
 	if common.NoAPI == false {
 		if len(filePath) == 0 {
 			common.Color["Red"].Println("Not given a json file, using empty", reader.FPath)
+			reader.All = nil
 		} else {
-			common.Color["Magenta"].Println("Loading ", filePath[0])
 			var err error
+			common.Color["Magenta"].Println("Loading ", filePath[0])
 			if reader.IsURL(filePath[0]) {
 				err = reader.GetFile(filePath[0])
 			} else {
@@ -156,31 +177,37 @@ func main() {
 
 			if err != nil {
 				common.ErrorPrintExit(err.Error(), 4)
+			} else {
+				common.Color["Magenta"].Println("Done")
 			}
-
-			common.Color["Magenta"].Println("Done")
 		}
 	}
 
-	// Start Serve
-	if err := server.SetHandle(); err != nil {
-		common.ErrorPrintExit(err.Error(), 5)
+	// Print information
+	IPs := common.GetIPs(flagHost)
+	if common.NoUI == false {
+		common.Color["Bold"].Println("UI_Path: ", common.UIPath)
 	}
-
 	if common.NoAPI == false {
-		common.Color["Bold"].Println("API: ", reader.FPath)
-		common.Color["Yellow"].Printf("http://%s:%s/%s\n", flagHost, flagPort, common.API)
+		common.Color["Bold"].Println("API_Path: ", common.APIPath)
+		common.Color["Bold"].Println("FILE_Path: ", reader.FPath)
 	}
 	if common.StaticFolder != "" {
+		common.Color["Bold"].Println("FOLDER_Path: ", common.FolderPath)
 		common.Color["Bold"].Println("Static Folder: ", common.StaticFolder)
-		common.Color["Yellow"].Printf("http://%s:%s\n", flagHost, flagPort)
 	}
 
-	if common.AuthBasic != "" {
+	for _, IP := range IPs {
+		common.Color["Yellow"].Printf(" - http://%s:%s\n", IP, flagPort)
+	}
+
+	if len(common.AuthBasic) > 1 {
 		common.Color["Blue"].Println("Basic auth activated")
 	}
 
+	// listen key input
 	go reader.ReadKey()
 
+	// Start Serve
 	server.Serve(flagHost, flagPort)
 }

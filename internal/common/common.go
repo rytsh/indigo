@@ -2,24 +2,35 @@ package common
 
 import (
 	"fmt"
+	"net/url"
 	"os"
+	"regexp"
 	"strings"
 )
 
 // Version number
 var Version string = "v0.0"
 
-// API path
-var API string = ""
+// APIPath URL
+var APIPath string = ""
 
-//NoAPI can close API
+//NoAPI for close API
 var NoAPI bool = false
+
+// UIPath URL
+var UIPath string = ""
+
+// NoUI for close UI
+var NoUI bool = false
+
+// FolderPath path
+var FolderPath string = ""
 
 // StaticFolder path
 var StaticFolder string = ""
 
-// AuthBasic is username:password
-var AuthBasic string = ""
+// AuthBasic is username, password
+var AuthBasic []string
 
 // array flag
 type arrayFlags []string
@@ -40,22 +51,25 @@ var Proxy arrayFlags
 
 // Intro text
 const Intro = `
- _____ _   _ _____ _____ ____   ____  
-|_   _| \ | |  __ \_   _/ ___\ / __ \ 
-  | | |  \| | |  | || || |  __| |  | |
-  | | |     | |  | || || | |_ | |  | |
- _| |_| |\  | |__| || || |__| | |__| |
-|_____|_| \_|_____/_____\_____/\ %s
+   ////        ///   ///        ////     ///         //    
+///////  ///   ///  //////   ///////    ////        ////   
+  ///    ////  ///  /// ////   ////   ////        //////// 
+  ///    /////////  ///  ////  ////  ////  ///// ///   ////
+  ///    /////////  /// ////    ///  ////  //////////   ///
+  ///    /// /////  ///////     ///    //// ///   //////// 
+///////  ///  ////  /////     ///////    /////      /////  
+ ///     //    //   ///       ///         ///       %s
+
 `
 
 const info = `
 ___,___,_______,____
 |  :::|///-/||-||    \
-|  :::|//-//|| || J)  |   ## INFO ##
-|  :::|/-///|!-!|     |   - You can send POST, PUT, PATH, DELETE request to root path.
-|   _______________   |   - Root GET request reserved for UI support.
-|  |///////////////|  |   - In array reach value with 'id' field.
-|  |_______________|  |   - /test/ABC and /test/abc are act different.
+|  :::|//-//|| || J)  |   ## WELCOME INDIGO INFO ##
+|  :::|/-///|!-!|     |   - GET, POST, PUT, PATH, DELETE request to root path.
+|   _______________   |   - In array reach value with 'id' field.
+|  |///////////////|  |   - /test/ABC and /test/abc are act different.
+|  |_______________|  |   - [ui > api > folder] if shows same url
 |  |____indigo_____|  |
 |  |_______________|  |
 |  |%s| _|
@@ -96,4 +110,41 @@ func FolderExists(folderName string) bool {
 		return false
 	}
 	return info.IsDir()
+}
+
+var r = regexp.MustCompile("(/)(/)+")
+
+func trimStringPre(val string, pre string) string {
+	return pre + strings.Trim(r.ReplaceAllString(val, "/"), "/ ")
+}
+
+// TrimSlash trim "/" chars
+func TrimSlash(val string) string {
+	return trimStringPre(val, "/")
+}
+
+// TrimURL is eliminate "/" chars and return searchURL
+func TrimURL(URL string) []string {
+	searchURL := strings.Trim(strings.TrimPrefix(URL, APIPath), "/")
+	// parse
+	var searchURLX []string
+	if searchURL != "" {
+		searchURLX = strings.Split(searchURL, "/")
+	}
+
+	return searchURLX
+}
+
+// SetURL api, UI start url
+func SetURL(val string, raw bool, who *string) {
+	if raw {
+		*who = val
+	} else {
+		values := strings.Split(trimStringPre(val, ""), "/")
+		vsf := make([]string, 0, len(values))
+		for _, v := range values {
+			vsf = append(vsf, url.PathEscape(v))
+		}
+		*who = "/" + strings.Join(vsf, "/")
+	}
 }

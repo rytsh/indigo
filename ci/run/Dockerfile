@@ -2,10 +2,10 @@ FROM alpine:3
 
 LABEL maintainer="rytsh@devusage.com"
 
-ARG FILE=indigo-linux-amd64-v0.3.2.tar.gz
+ARG VERSION
+ARG FILE=indigo-linux-amd64-${VERSION}.tar.gz
 
-ADD https://github.com/rytsh/indigo/releases/latest/download/indigo-linux-amd64-v0.3.2.tar.gz /
-RUN tar -zxf ${FILE} -C /usr/local/bin/ && rm ${FILE}
+ADD --chown=root:root out/${FILE} /usr/local/bin/
 
 WORKDIR /workspace
 VOLUME [ "/workspace" ]

@@ -1,5 +1,5 @@
 out/*
-test/ex?*.json
+page/public/test/users?*.json
 data-*.json
 
 !out/.gitkeep

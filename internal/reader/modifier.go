@@ -66,11 +66,16 @@ func GoInner(val *interface{}, urlPath []string) (*interface{}, *interface{}, in
 		// urlpath zero
 		return val, nil, 0, nil
 	}
+	// if not return anything
 	return nil, nil, 0, errors.New(`{"err": "Not found!"}`)
 }
 
 // GetHandle data with id or root path
 func GetHandle(val *interface{}) ([]byte, error) {
+	// string return without quote
+	if reflect.ValueOf(*val).Kind() == reflect.String {
+		return []byte((*val).(string)), nil
+	}
 	turnJ, err := json.Marshal(val)
 	if err != nil {
 		log.Println("ERR: Cannot translate to JSON")
