@@ -1,4 +1,6 @@
-main.svelte-1gbw9v0{padding:1em;max-width:240px;margin:0 auto}.title.svelte-1gbw9v0{text-align:center;font-family:'Caesar Dressing', cursive;font-size:72pt;margin:0}@media(min-width: 640px){main.svelte-1gbw9v0{max-width:none}}
-.code.svelte-1hdayrb{background-color:#cdcdcd;padding:16px;text-align:left;display:flex;font-size:12px;overflow:auto}.pre.svelte-1hdayrb{color:#3a3a3a;padding-right:20px}
+.landing-page.svelte-cay962{background-color:#edf2f4}.top-bar.svelte-cay962{background-color:#e5e5e5;border-bottom:solid 1px #333;height:80px}.container.svelte-cay962{max-width:1e3px;margin:0 auto;padding:0 10px}.main.svelte-cay962{background-color:#fff;border-left:solid 1px #e5e5e5;border-right:solid 1px #e5e5e5;overflow-x:auto}.title.svelte-cay962{text-align:left;font-family:'Caesar Dressing', cursive;font-size:72px;margin:0}
+.mail.svelte-u45ni0{text-align:right}
+.wrap.svelte-1uyj0gb{white-space:break-spaces;word-break:break-all}svg.svelte-1uyj0gb{width:16px}button.svelte-1uyj0gb{margin:unset;padding:8px;border:unset;border-radius:unset;border-right:solid 1px #333;background-color:#efefef;cursor:pointer}button.svelte-1uyj0gb:hover{background-color:#ddd}code.svelte-1uyj0gb{padding:16px;overflow:auto}pre.svelte-1uyj0gb{background-color:#f6f8fa;text-align:left;display:flex;font-size:12px}
+.hash.svelte-1frfd25.svelte-1frfd25{visibility:hidden}.t1.svelte-1frfd25.svelte-1frfd25{font-size:26px;font-weight:600}.t2.svelte-1frfd25.svelte-1frfd25{font-size:18px;font-weight:600}.header.svelte-1frfd25.svelte-1frfd25:hover{text-decoration:underline}.header.svelte-1frfd25:hover .hash.svelte-1frfd25{visibility:initial}.title.svelte-1frfd25.svelte-1frfd25{color:initial}
 
 /*# sourceMappingURL=bundle.css.map */
