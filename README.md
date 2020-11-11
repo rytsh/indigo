@@ -5,6 +5,7 @@
 [![Discord](https://img.shields.io/discord/706631996478324898?style=flat-square)](https://discordapp.com/channels/706631996478324898)
 [![Docker](https://img.shields.io/badge/dockerHub-indigo-blue?style=flat-square&logo=docker)](https://hub.docker.com/r/ryts/indigo)
 [![Web](https://img.shields.io/badge/web-gh--pages-blueviolet?style=flat-square)](https://rytsh.github.io/indigo/)
+[![Coveralls github branch](https://img.shields.io/coveralls/github/rytsh/indigo/master?style=flat-square)](https://coveralls.io/github/rytsh/indigo?branch=master)
 
 Serve any json file with GET, POST, PUT, PATCH or DELETE request data, even most inner object and root path.
 

@@ -100,7 +100,7 @@ while [[ "$#" -gt 0 ]]; do
         shift 1
         ;;
     --build-docker)
-        PUBLISH_DOCKER="Y"
+        BUILD_DOCKER="Y"
         shift 1
         ;;
     --test)
