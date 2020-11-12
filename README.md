@@ -68,7 +68,7 @@ Options:
 
 You can download binary form in releases.
 
-Or you can build with show PLATFORM (def: "windows darwin linux") and ARCHS (def: "amd64") variable
+Or you can build with show PLATFORMS (def: "windows darwin linux") and ARCHS (def: "amd64") variable
 
 ```shell
 PLATFORMS="windows linux" ARCHS="386 amd64" ./build.sh --build --clean
