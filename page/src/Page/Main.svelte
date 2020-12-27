@@ -5,17 +5,18 @@
 </script>
 
 <p>Serve any json file with GET, POST, PUT, PATCH or DELETE request data, even most inner object and root path.</p>
+<p>Serve folder with SPA, browsable support options.</p>
 
 <Title id="installation">Installation</Title>
 <p>The most recent version of <b>indigo</b> is {VERSION}. Downloads are available on <a href="https://github.com/rytsh/indigo/releases/latest" target="_blank">GitHub</a>:</p>
 
 <ul>
-	<li>Linux 64-bit: <a href="https://github.com/rytsh/indigo/releases/latest/download/indigo-linux-amd64-{VERSION}.tar.gz">indigo-linux-amd64-{VERSION}.tar.gz</a></li>
+	<li>Linux 64-bit: <a href="https://github.com/rytsh/indigo/releases/latest/download/indigo-linux-amd64-{VERSION}.tar.gz">indigo-linux-amd64-{VERSION}.tar.gz</a> | <a href="https://github.com/rytsh/indigo/releases/latest/download/indigo-linux-arm64-{VERSION}.tar.gz">indigo-linux-arm64-{VERSION}.tar.gz</a></li>
 	<li>macOS 64-bit: <a href="https://github.com/rytsh/indigo/releases/latest/download/indigo-darwin-amd64-{VERSION}.tar.gz">indigo-darwin-amd64-{VERSION}.tar.gz</a></li>
 	<li>Windows 64-bit: <a href="https://github.com/rytsh/indigo/releases/latest/download/indigo-windows-amd64-{VERSION}.zip">indigo-windows-amd64-{VERSION}.zip</a></li>
 </ul>
 
-<p>Get in Linux</p>
+<p>Get in Linux amd64</p>
 <Code button code="curl -fsSL https://github.com/rytsh/indigo/releases/latest/download/indigo-linux-amd64-{VERSION}.tar.gz | sudo tar --overwrite -zx -C /usr/local/bin/"/>
 
 <p>Run in <a href="https://hub.docker.com/r/ryts/indigo" target="_blank">docker</a></p>
@@ -24,7 +25,8 @@
 <Title id="options">Options</Title>
 
 <Code code={
-`indigo [OPTIONS] <source_or_URL>
+`indigo [OPTIONS] <file_or_URL>
+Generate RestAPI with JSON file and serve folder
 
 Options:
   --port, -P <3000>
@@ -37,13 +39,18 @@ Options:
   --api-path <api_url_path>
     Set API path prefix
   --ui-path <ui_url_path>
-	Set UI path default '/indigo'
+    Set UI path default '/indigo'
 
   --folder <./public>
     Serve folder
-      Add an --api-path to avoid mix
   --folder-path <folder_path>
     Set Folder path, works with folder option
+  --browsable
+    Enable folder browsable
+  --spa
+    Enable SPA mode
+  --no-index
+    Stop redirect to index
 
   --no-api
     Close API server, use just serve folder
@@ -64,6 +71,8 @@ Options:
 
 <p>s + enter will create a snapshot of the db on a new file.</p>
 
+<p>If same URL uses, order is UI &gt; API &gt; FILE</p>
+
 <p>Gzip compress can usable with <span class="color">Accept-Encoding: gzip</span> header set.</p>
 
 <Title id="examples">Examples</Title>
@@ -80,7 +89,13 @@ Buzz`}/>
 <Code code="$ indigo --auth-basic user:pass db.json"/>
 
 <p>Share just a folder</p>
-<Code code="$ indigo --folder ./public --no-api"/>
+<Code code="$ indigo --folder ./public --no-api --no-ui"/>
+
+<p>Share just a folder with SPA</p>
+<Code code="$ indigo --folder ./public --no-api --no-ui --spa"/>
+
+<p>Share just a folder with just browsable support</p>
+<Code code="$ indigo --folder ./public --no-api --no-ui --browsable --no-index"/>
 
 <hr/>
 
@@ -188,7 +203,7 @@ null
 
 <hr/>
 
-<p class="mail">MIT Licensed <a href="mailto:rytsh@devusage.com">rytsh@devusage.com</a></p>
+<p class="mail"><a href="https://github.com/rytsh/indigo/blob/master/LICENSE" target="_blank">MIT Licensed</a> | <a href="mailto:rytsh@devusage.com">rytsh@devusage.com</a></p>
 
 <style>
 	.mail {

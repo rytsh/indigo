@@ -41,7 +41,7 @@
 
 	.title {
         text-align: left;
-        font-family: 'Caesar Dressing', cursive;
+        font-family: 'Caesar Dressing', monospace;
         font-size: 72px;
 		margin: 0;
 	}

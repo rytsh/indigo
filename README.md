@@ -6,8 +6,10 @@
 [![Docker](https://img.shields.io/badge/dockerHub-indigo-blue?style=flat-square&logo=docker)](https://hub.docker.com/r/ryts/indigo)
 [![Web](https://img.shields.io/badge/web-gh--pages-blueviolet?style=flat-square)](https://rytsh.github.io/indigo/)
 [![Coveralls github branch](https://img.shields.io/coveralls/github/rytsh/indigo/master?style=flat-square)](https://coveralls.io/github/rytsh/indigo?branch=master)
+![Drone (cloud)](https://img.shields.io/drone/build/rytsh/indigo?style=flat-square)
 
-Serve any json file with GET, POST, PUT, PATCH or DELETE request data, even most inner object and root path.
+Serve any json file with GET, POST, PUT, PATCH or DELETE request data, even most inner object and root path.  
+Serve folder with SPA, browsable support options.
 
 ---
 
@@ -16,8 +18,9 @@ Serve any json file with GET, POST, PUT, PATCH or DELETE request data, even most
 Indigo hold all data in memory and case sensetive like what you see in json file.
 
 Add an `id` field when PUT, POST, PATCH if you working on an array. indigo not put an auto-id. `id` field help us to find data in array.  
-If same URL uses order is UI > API > FILE
-I will add more useful stuff in it and write test cases. If you see any error or wants to support something write me.
+If same URL uses, order is UI > API > FILE  
+I will add more useful stuff in it and write test cases.  
+If you see any error or wants to support something write me.
 
 ## Options
 
@@ -40,9 +43,14 @@ Options:
 
   --folder <./public>
     Serve folder
-      Add an --api-path to avoid mix
   --folder-path <folder_path>
     Set Folder path, works with folder option
+  --browsable
+    Enable folder browsable
+  --spa
+    Enable SPA mode
+  --no-index
+    Stop redirect to index
 
   --no-api
     Close API server, use just serve folder
@@ -68,11 +76,14 @@ Options:
 
 You can download binary form in releases.
 
-Or you can build with show PLATFORMS (def: "windows darwin linux") and ARCHS (def: "amd64") variable
+Or you can build with show PLATFORMS, each platform seperated by `,` and each arch by `-`.
 
 ```shell
-PLATFORMS="windows linux" ARCHS="386 amd64" ./build.sh --build --clean
+PLATFORMS="windows:amd64,linux:arm64-amd64,darwin:amd64" ./build.sh --build --clean
 ```
+
+Check list of platforms and archs here  
+<https://gist.github.com/asukakenji/f15ba7e588ac42795f421b48b8aede63>
 
 ---
 

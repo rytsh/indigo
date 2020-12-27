@@ -26,8 +26,21 @@ var NoUI bool = false
 // FolderPath path
 var FolderPath string = ""
 
+////////////////////////////// FOLDER SHARE
+
 // StaticFolder path
 var StaticFolder string = ""
+
+// StaticBrowsable open folder list
+var StaticBrowsable bool = false
+
+// StaticSPA return 404 error to index
+var StaticSPA bool = false
+
+// NoIndex stop redirect and show index
+var NoIndex bool = false
+
+////////////////////////////// END FOLDER SHARE
 
 // AuthBasic is username, password
 var AuthBasic []string

@@ -10,3 +10,30 @@ steps:
       from_secret: COVERALLS_TOKEN
   commands:
   - ./build.sh --coveralls
+  when:
+    branch:
+    - master
+    event:
+    - push
+
+- name: build
+  image: ryts/go:1.14
+  commands:
+  - PLATFORMS="linux:amd64" ./build.sh --clean --build --build-context
+  when:
+    event:
+    - tag
+
+- name: dockerhub
+  image: gcr.io/kaniko-project/executor:latest
+  environment:
+    DOCKER_REGISTRY:
+      from_secret: DOCKER_REGISTRY
+    DOCKER_AUTH:
+      from_secret: DOCKER_AUTH
+  commands:
+  - echo "{\"auths\":{\"$DOCKER_REGISTRY\":{\"auth\":\"$DOCKER_AUTH\"}}}" > /kaniko/.docker/config.json
+  - /kaniko/executor --context tar://out/context.tar.gz --dockerfile ci/run/Dockerfile --destination ryts:$(cat out/version) --destination ryts:latest
+  when:
+    event:
+    - tag

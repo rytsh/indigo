@@ -16,7 +16,8 @@ func APIHandle(val *interface{}) http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		// trim and split
 		var searchURLX []string
-		searchURLX = common.TrimURL(r.URL.Path)
+		// Clean URL
+		searchURLX = common.TrimURL(common.TrimSlash(r.URL.Path))
 		// get inner url
 		rVal, rAVal, rAIndex, err := reader.GoInner(val, searchURLX)
 		if err != nil {

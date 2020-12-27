@@ -2,19 +2,33 @@ package server
 
 import (
 	"fmt"
-	"indigo/internal/common"
+	"regexp"
 )
 
-type reg struct {
-	UI     string
-	API    string
-	FOLDER string
+type selection int
+
+const (
+	regexSelect selection = iota
+	stringSelect
+)
+
+type checkSelection struct {
+	stringCheck string
+	regexCheck  *regexp.Regexp
+	useCheck    selection
 }
 
-var regex = reg{
-	UI:     "",
-	API:    "",
-	FOLDER: "/.*$",
+type checks struct {
+	UI     checkSelection
+	API    checkSelection
+	FOLDER checkSelection
+}
+
+// checkAll use for regex and string check
+var checkAll = checks{
+	UI:     checkSelection{},
+	API:    checkSelection{},
+	FOLDER: checkSelection{},
 }
 
 // SetRegexString of regex
@@ -22,28 +36,27 @@ func SetRegexString(value string, who string) {
 	switch who {
 	case "UI":
 		if value == "/" {
-			regex.UI = `/+(#.*)*$`
+			checkAll.UI.regexCheck = regexp.MustCompile(`/+(#.*)*$`)
 		} else {
-			regex.UI = fmt.Sprintf(`%s([/]#.*)*$`, value)
+			checkAll.UI.regexCheck = regexp.MustCompile(fmt.Sprintf(`%s([/]#.*)*$`, value))
 		}
+		checkAll.UI.stringCheck = value
+		checkAll.UI.useCheck = stringSelect
 	case "API":
 		if value == "/" {
-			regex.API = `[/]+.*$`
+			checkAll.API.regexCheck = regexp.MustCompile(`[/]+.*$`)
 		} else {
-			regex.API = fmt.Sprintf(`%s([/]+.*)*$`, value)
+			checkAll.API.regexCheck = regexp.MustCompile(fmt.Sprintf(`%s([/]+.*)*$`, value))
 		}
+		checkAll.API.stringCheck = value
+		checkAll.API.useCheck = stringSelect
 	case "FOLDER":
 		if value == "/" {
-			regex.FOLDER = `[/]+.*$`
+			checkAll.FOLDER.regexCheck = regexp.MustCompile(`[/]+.*$`)
 		} else {
-			regex.FOLDER = fmt.Sprintf(`%s([/]+.*)*$`, value)
+			checkAll.FOLDER.regexCheck = regexp.MustCompile(fmt.Sprintf(`%s([/]+.*)*$`, value))
 		}
+		checkAll.FOLDER.stringCheck = value
+		checkAll.FOLDER.useCheck = stringSelect
 	}
-}
-
-// SetRegexs is setting regex
-func SetRegexs() {
-	SetRegexString(common.UIPath, "UI")
-	SetRegexString(common.APIPath, "API")
-	SetRegexString(common.FolderPath, "FOLDER")
 }

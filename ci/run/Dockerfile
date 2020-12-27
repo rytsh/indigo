@@ -1,13 +1,14 @@
-FROM alpine:3
+FROM scratch
 
 LABEL maintainer="rytsh@devusage.com"
 
-ARG VERSION
-ARG FILE=indigo-linux-amd64-${VERSION}.tar.gz
+ARG FILE=indigo
 
-ADD --chown=root:root out/${FILE} /usr/local/bin/
+ADD out/linux/${FILE} /
 
 WORKDIR /workspace
 VOLUME [ "/workspace" ]
 
-ENTRYPOINT [ "indigo", "-H", "0.0.0.0" ]
+EXPOSE 3000
+
+ENTRYPOINT [ "/indigo", "-H", "0.0.0.0" ]

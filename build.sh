@@ -18,14 +18,15 @@ function usage() {
     cat - <<EOF
 Build script for golang
 Set PLATFORMS env variable to export
-PLATFORMS="windows linux darwin" is default
-ARCHS="amd64" is default
+PLATFORMS="windows:amd64,linux:amd64,darwin:amd64" is default
 Usage: $0 <OPTIONS>
 OPTIONS:
   --run
     Run for dev
   --build
     Build application to various platforms
+    --pack
+      Pack output
   --clean
     Clean output folder
 
@@ -37,8 +38,11 @@ OPTIONS:
   --publish-page
     Publish page directory in gh-pages branch
 
+  --build-context
+    Build context for image build
   --build-docker
     Build docker image and publish to docker hub
+    Auto enabled build-context
 
   --coveralls
     Run coveralls tool
@@ -55,14 +59,16 @@ function build() {
     OUTPUT_FOLDER_IN=${OUTPUT_FOLDER}/${1}
     mkdir -p ${OUTPUT_FOLDER_IN}
     CGO_ENABLED=0 GOOS=${1} GOARCH=${2} go build -trimpath -ldflags="-s -w -X ${FLAG_V}" -o ${OUTPUT_FOLDER_IN} ${MAINGO}
-    (
-	    cd ${OUTPUT_FOLDER_IN}
-        if [[ "${1}" == "windows" ]]; then
-            zip ../indigo-${1}-${2}-${VERSION}.zip *
-        else
-            tar czf ../indigo-${1}-${2}-${VERSION}.tar.gz *
-        fi
-    )
+    if [[ "${PACK}" == "Y" ]]; then
+        (
+            cd ${OUTPUT_FOLDER_IN}
+            if [[ "${1}" == "windows" ]]; then
+                zip ../indigo-${1}-${2}-${VERSION}.zip *
+            else
+                tar czf ../indigo-${1}-${2}-${VERSION}.tar.gz *
+            fi
+        )
+    fi
 }
 #######################
 
@@ -71,11 +77,7 @@ function build() {
 
 if [[ -z ${PLATFORMS} ]]; then
     # set default platforms
-    PLATFORMS="windows linux darwin"
-fi
-
-if [[ -z ${ARCHS} ]]; then
-    ARCHS="amd64"
+    PLATFORMS="windows:amd64,linux:amd64,darwin:amd64"
 fi
 
 while [[ "$#" -gt 0 ]]; do
@@ -91,6 +93,10 @@ while [[ "$#" -gt 0 ]]; do
         BUILD="Y"
         shift 1
         ;;
+    --pack)
+        PACK="Y"
+        shift 1
+        ;;
     --clean)
         CLEAN="Y"
         shift 1
@@ -99,8 +105,13 @@ while [[ "$#" -gt 0 ]]; do
         PUBLISH_PAGE="Y"
         shift 1
         ;;
+    --build-context)
+        CONTEXT_BUILD="Y"
+        shift 1
+        ;;
     --build-docker)
         BUILD_DOCKER="Y"
+        CONTEXT_BUILD="Y"
         shift 1
         ;;
     --test)
@@ -151,8 +162,12 @@ fi
 if [[ "${BUILD}" == "Y" ]]; then
     set -e
     mkdir -p ${OUTPUT_FOLDER}
-    for PLATFORM in ${PLATFORMS}; do
-        for ARCH in ${ARCHS}; do
+    IFS=',' read -ra PLATFORMS_ARR <<< $(echo ${PLATFORMS} | tr -d ' ')
+    for PLATFORM_A in "${PLATFORMS_ARR[@]}"; do
+        PLATFORM=$(echo ${PLATFORM_A} | cut -d ':' -f 1)
+        ARCHS=$(echo ${PLATFORM_A} | cut -d ':' -f 2)
+        IFS='-' read -ra ARCHS_ARR <<< ${ARCHS}
+        for ARCH in ${ARCHS_ARR[@]}; do
             build ${PLATFORM} ${ARCH}
         done
     done
@@ -169,10 +184,17 @@ if [[ "${PUBLISH_PAGE}" == "Y" ]]; then
     )
 fi
 
+# Context for docker build
+if [[ "${CONTEXT_BUILD}" == "Y" ]]; then
+    echo "> Context building ${VERSION}"
+    echo -n ${VERSION} > "${OUTPUT_FOLDER}/version"
+    tar -czf "${OUTPUT_FOLDER}/context.tar.gz" out/linux/indigo ci/run/Dockerfile
+fi
+
 # Publish Docker
 if [[ "${BUILD_DOCKER}" == "Y" ]]; then
     echo "> Build docker ${VERSION}"
-    docker build -t ryts/indigo:${VERSION} --build-arg VERSION=${VERSION} -f ci/run/Dockerfile .
+    docker build -t ryts/indigo:${VERSION} -f ci/run/Dockerfile - < "${OUTPUT_FOLDER}/context.tar.gz"
     docker tag ryts/indigo:${VERSION} ryts/indigo:latest
 fi
 ###############

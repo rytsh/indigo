@@ -8,39 +8,34 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"regexp"
 	"strings"
 )
 
 // SRV is a general http server
 var SRV http.Server
 
-var mux = &RegexpHandler{}
+var mux = &MxHandler{}
 
 var idleConnsClosed = make(chan struct{})
 
 // setHandle generate handle URL's
 func setHandle() error {
-	// Set regex strings
-	SetRegexs()
-
 	// UI
 	if common.NoUI == false {
-		reg := regexp.MustCompile(regex.UI)
-		mux.HandleFunc(reg, UIHandle(), false, nil)
+		SetRegexString(common.UIPath, "UI")
+		mux.HandleFunc(&checkAll.UI, UIHandle())
 	}
 
 	// Serve API
 	if common.NoAPI == false {
-		reg := regexp.MustCompile(regex.API)
-		mux.HandleFunc(reg, APIHandle(&reader.All), false, nil)
+		SetRegexString(common.APIPath, "API")
+		mux.HandleFunc(&checkAll.API, APIHandle(&reader.All))
 	}
 
 	// Serve Static Folder
 	if common.StaticFolder != "" {
-		reg := regexp.MustCompile(regex.FOLDER)
-		fs := http.FileServer(http.Dir(common.StaticFolder))
-		mux.Handler(reg, fs, true, &common.FolderPath)
+		SetRegexString(common.FolderPath, "FOLDER")
+		mux.HandleFunc(&checkAll.FOLDER, FolderHandle(http.Dir(common.StaticFolder), &common.FolderPath))
 	}
 
 	if common.NoAPI && common.StaticFolder == "" {
@@ -59,7 +54,7 @@ func (w gzipResponseWriter) Write(b []byte) (int, error) {
 	return w.Writer.Write(b)
 }
 
-func logRequest(handler http.Handler) http.Handler {
+func preOperation(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Basic Auth
 		if len(common.AuthBasic) > 1 {
@@ -74,17 +69,14 @@ func logRequest(handler http.Handler) http.Handler {
 		}
 		// End Basic Auth
 
-		// Clean URL
-		r.URL.Path = common.TrimSlash(r.URL.Path)
-
-		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
-			handler.ServeHTTP(w, r)
-		} else {
+		if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
 			w.Header().Set("Content-Encoding", "gzip")
 			gz := gzip.NewWriter(w)
 			defer gz.Close()
 			gzw := gzipResponseWriter{Writer: gz, ResponseWriter: w}
 			handler.ServeHTTP(gzw, r)
+		} else {
+			handler.ServeHTTP(w, r)
 		}
 		log.Printf("- %s - %s %s\n", r.RemoteAddr[:strings.LastIndex(r.RemoteAddr, ":")], r.Method, r.URL)
 	})
@@ -97,7 +89,7 @@ func Serve(host string, port string) {
 	}
 
 	SRV.Addr = fmt.Sprintf("%s:%s", host, port)
-	SRV.Handler = logRequest(mux)
+	SRV.Handler = preOperation(mux)
 	if err := SRV.ListenAndServe(); err != http.ErrServerClosed {
 		// Error starting or closing listener:
 		log.Fatalf("HTTP server ListenAndServe: %v", err)

@@ -1,7 +1,6 @@
 package server
 
 import (
-	"regexp"
 	"testing"
 )
 
@@ -113,39 +112,36 @@ func TestSetRegexString(t *testing.T) {
 			for _, arg := range tt.args {
 				SetRegexString(arg.value, arg.who)
 			}
-			regUI := regexp.MustCompile(regex.UI)
-			regAPI := regexp.MustCompile(regex.API)
-			regFOLDER := regexp.MustCompile(regex.FOLDER)
 			// check pass
 			for _, ps := range tt.pass.ui {
-				if regUI.MatchString(ps) == false {
-					t.Errorf("SetRegexString() ui reg = [%v], url [%v]", regex.UI, ps)
+				if checkAll.UI.regexCheck.MatchString(ps) == false {
+					t.Errorf("SetRegexString() ui reg = [%v], url [%v]", checkAll.UI.regexCheck.String(), ps)
 				}
 			}
 			for _, ps := range tt.pass.api {
-				if regAPI.MatchString(ps) == false {
-					t.Errorf("SetRegexString() api reg = [%v], url [%v]", regex.API, ps)
+				if checkAll.API.regexCheck.MatchString(ps) == false {
+					t.Errorf("SetRegexString() api reg = [%v], url [%v]", checkAll.API.regexCheck.String(), ps)
 				}
 			}
 			for _, ps := range tt.pass.folder {
-				if regFOLDER.MatchString(ps) == false {
-					t.Errorf("SetRegexString() folder reg = [%v], url [%v]", regex.FOLDER, ps)
+				if checkAll.FOLDER.regexCheck.MatchString(ps) == false {
+					t.Errorf("SetRegexString() folder reg = [%v], url [%v]", checkAll.FOLDER.regexCheck.String(), ps)
 				}
 			}
 			// check nopass
 			for _, nps := range tt.nopass.ui {
-				if regUI.MatchString(nps) {
-					t.Errorf("SetRegexString() ui NO reg = [%v], url [%v]", regex.UI, nps)
+				if checkAll.UI.regexCheck.MatchString(nps) {
+					t.Errorf("SetRegexString() ui NO reg = [%v], url [%v]", checkAll.UI.regexCheck.String(), nps)
 				}
 			}
 			for _, nps := range tt.nopass.api {
-				if regAPI.MatchString(nps) {
-					t.Errorf("SetRegexString() api NO reg = [%v], url [%v]", regex.API, nps)
+				if checkAll.API.regexCheck.MatchString(nps) {
+					t.Errorf("SetRegexString() api NO reg = [%v], url [%v]", checkAll.API.regexCheck.String(), nps)
 				}
 			}
 			for _, nps := range tt.nopass.folder {
-				if regFOLDER.MatchString(nps) {
-					t.Errorf("SetRegexString() folder NO reg = [%v], url [%v]", regex.FOLDER, nps)
+				if checkAll.FOLDER.regexCheck.MatchString(nps) {
+					t.Errorf("SetRegexString() folder NO reg = [%v], url [%v]", checkAll.FOLDER.regexCheck.String(), nps)
 				}
 			}
 		})

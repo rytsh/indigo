@@ -33,9 +33,14 @@ Options:
 
   --folder <./public>
     Serve folder
-      Add an --api-path to avoid mix
   --folder-path <folder_path>
     Set Folder path, works with folder option
+  --browsable
+    Enable folder browsable
+  --spa
+    Enable SPA mode
+  --no-index
+    Stop redirect to index
 
   --no-api
     Close API server, use just serve folder
@@ -85,7 +90,9 @@ func flagParse() []string {
 
 	flag.StringVar(&common.StaticFolder, "folder", "", "")
 	flag.StringVar(&flagAuthBasic, "auth-basic", "", "")
-	// flag.Var(&common.Proxy, "proxy", "")
+	flag.BoolVar(&common.StaticBrowsable, "browsable", false, "")
+	flag.BoolVar(&common.StaticSPA, "spa", false, "")
+	flag.BoolVar(&common.NoIndex, "no-index", false, "")
 
 	flag.BoolVar(&flagNoColor, "no-color", false, "")
 	flag.BoolVar(&common.NoAPI, "no-api", false, "")
@@ -195,6 +202,15 @@ func main() {
 	if common.StaticFolder != "" {
 		common.Color["Bold"].Println("FOLDER_Path: ", common.FolderPath)
 		common.Color["Bold"].Println("Static Folder: ", common.StaticFolder)
+		if common.StaticBrowsable {
+			common.Color["Bold"].Println("Browsable: ", common.StaticBrowsable)
+		}
+		if common.StaticSPA {
+			common.Color["Bold"].Println("SPA: ", common.StaticSPA)
+		}
+		if common.NoIndex {
+			common.Color["Bold"].Println("No index redirect: ", common.NoIndex)
+		}
 	}
 
 	for _, IP := range IPs {
