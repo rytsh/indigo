@@ -25,7 +25,7 @@ steps:
     - tag
 
 - name: dockerhub
-  image: gcr.io/kaniko-project/executor:latest
+  image: gcr.io/kaniko-project/executor:debug
   environment:
     DOCKER_REGISTRY:
       from_secret: DOCKER_REGISTRY

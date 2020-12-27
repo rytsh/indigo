@@ -12,7 +12,7 @@
         });
     }
     if (!button) {
-        let lines = code.split('\n');
+        let lines = code.replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;").split('\n');
         code = "";
         for(var line = 0; line < lines.length; line++){
             if (lines[line][0] === '$') {
