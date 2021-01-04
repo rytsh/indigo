@@ -55,7 +55,7 @@ EOF
 #######################
 # Functions
 function build() {
-    echo "> Buiding indigo for ${1}"
+    echo "> Buiding indigo for ${1}-${2}"
     OUTPUT_FOLDER_IN=${OUTPUT_FOLDER}/${1}
     mkdir -p ${OUTPUT_FOLDER_IN}
     CGO_ENABLED=0 GOOS=${1} GOARCH=${2} go build -trimpath -ldflags="-s -w -X ${FLAG_V}" -o ${OUTPUT_FOLDER_IN} ${MAINGO}

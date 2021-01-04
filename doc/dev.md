@@ -15,6 +15,12 @@ Manuel github release binary.
 
 Docker push automatically handle by drone.io
 
+Manual docker build and push, run build command before this
+
+```sh
+./build.sh --build-context --build-docker
+```
+
 ---
 
 ```sh
