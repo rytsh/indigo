@@ -42,7 +42,7 @@ func serveFile(w http.ResponseWriter, r *http.Request, fs http.FileSystem, name 
 	// can't use Redirect() because that would make the path absolute,
 	// which would be a problem running under StripPrefix
 	if !common.NoIndex && strings.HasSuffix(r.URL.Path, indexPage) {
-		localRedirect(w, r, "./")
+		LocalRedirect(w, r, "./")
 		return
 	}
 
@@ -75,12 +75,12 @@ func serveFile(w http.ResponseWriter, r *http.Request, fs http.FileSystem, name 
 		url := r.URL.Path
 		if d.IsDir() {
 			if url[len(url)-1] != '/' {
-				localRedirect(w, r, path.Base(url)+"/")
+				LocalRedirect(w, r, path.Base(url)+"/")
 				return
 			}
 		} else {
 			if url[len(url)-1] == '/' {
-				localRedirect(w, r, "../"+path.Base(url))
+				LocalRedirect(w, r, "../"+path.Base(url))
 				return
 			}
 		}
@@ -90,7 +90,7 @@ func serveFile(w http.ResponseWriter, r *http.Request, fs http.FileSystem, name 
 		url := r.URL.Path
 		// redirect if the directory name doesn't end in a slash
 		if url == "" || url[len(url)-1] != '/' {
-			localRedirect(w, r, path.Base(url)+"/")
+			LocalRedirect(w, r, path.Base(url)+"/")
 			return
 		}
 
@@ -136,9 +136,9 @@ func serveFile(w http.ResponseWriter, r *http.Request, fs http.FileSystem, name 
 	http.ServeContent(w, r, d.Name(), d.ModTime(), f)
 }
 
-// localRedirect gives a Moved Permanently response.
+// LocalRedirect gives a Moved Permanently response.
 // It does not convert relative paths to absolute paths like Redirect does.
-func localRedirect(w http.ResponseWriter, r *http.Request, newPath string) {
+func LocalRedirect(w http.ResponseWriter, r *http.Request, newPath string) {
 	if q := r.URL.RawQuery; q != "" {
 		newPath += "?" + q
 	}

@@ -83,8 +83,8 @@ fi
 while [[ "$#" -gt 0 ]]; do
     case "${1}" in
     --run)
-        set -x
         shift 1
+        set -x
         go run cmd/indigo/indigo.go ${*}
         set +x
         exit 0
