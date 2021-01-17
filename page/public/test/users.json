@@ -3,11 +3,12 @@
     {
       "id": 1,
       "name": "Selin",
-      "age": 50,
+      "age": 22,
       "hobies": [
         "traveller",
         "movies",
-        "sport"
+        "sport",
+        "kahveci"
       ]
     },
     {
@@ -17,7 +18,7 @@
       "hobies": [
         "games",
         "sci-fi",
-        "driver"
+        "kamyoncu"
       ]
     },
     {
@@ -27,7 +28,8 @@
       "hobies": [
         "cars",
         "camping",
-        "fishing"
+        "fishing",
+        "job changer"
       ]
     },
     {
@@ -37,7 +39,8 @@
       "hobies": [
         "photography",
         "scout",
-        "cooking"
+        "cooking",
+        "siemens"
       ]
     },
     {
@@ -47,7 +50,8 @@
       "hobies": [
         "theater",
         "costume",
-        "star"
+        "star",
+        "professional interviewer"
       ]
     },
     {
@@ -57,7 +61,18 @@
       "hobies": [
         "mushrooms",
         "swiming",
-        "planes"
+        "planes",
+        "no hello no mello"
+      ]
+    },
+    {
+      "id": 67,
+      "name": "Utku",
+      "age": 67,
+      "hobies": [
+        "cars",
+        "mars",
+        "koç koç"
       ]
     },
     {
@@ -67,7 +82,7 @@
       "hobies": [
         "gastronomi",
         "literature",
-        "ege"
+        "ege'nin incisi"
       ]
     },
     {

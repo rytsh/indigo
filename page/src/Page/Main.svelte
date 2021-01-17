@@ -107,7 +107,7 @@ Buzz`}/>
 <Code wrap code={
 `$ curl http://localhost:3000
 
-{"users":[{"age":50,"hobies":["traveller","movies","sport"],"id":1,"name":"Selin"},{"age":55,"hobies":["games","sci-fi","driver"],"id":"xx","name":"Eray"},{"age":52,"hobies":["cars","camping","fishing"],"id":2,"name":"Ali"},{"age":50,"hobies":["photography","scout","cooking"],"id":3,"name":"Sinem"},{"age":53,"hobies":["theater","costume","star"],"id":4,"name":"Yasin"},{"age":44,"hobies":["mushrooms","swiming","planes"],"id":5,"name":"Aysun"},{"age":49,"hobies":["gastronomi","literature","ege"],"id":6,"name":"Zeynep"},{"age":50,"hobies":["books","games","fast write"],"id":7,"name":"Cagatay"},{"age":50,"hobies":["painting","presentation","pasta"],"id":8,"name":"Cansu"}]}
+{"users":[{"age":22,"hobies":["traveller","movies","sport","kahveci"],"id":1,"name":"Selin"},{"age":55,"hobies":["games","sci-fi","kamyoncu"],"id":"xx","name":"Eray"},{"age":52,"hobies":["cars","camping","fishing","job changer"],"id":2,"name":"Ali"},{"age":50,"hobies":["photography","scout","cooking","siemens"],"id":3,"name":"Sinem"},{"age":53,"hobies":["theater","costume","star","professional interviewer"],"id":4,"name":"Yasin"},{"age":44,"hobies":["mushrooms","swiming","planes","no hello no mello"],"id":5,"name":"Aysun"},{"age":67,"hobies":["cars","mars","koç koç"],"id":67,"name":"Utku"},{"age":49,"hobies":["gastronomi","literature","ege'nin incisi"],"id":6,"name":"Zeynep"},{"age":50,"hobies":["books","games","fast write"],"id":7,"name":"Cagatay"},{"age":50,"hobies":["painting","presentation","pasta"],"id":8,"name":"Cansu"}]}
 
 $ curl http://localhost:3000/users/1
 
