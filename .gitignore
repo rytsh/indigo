@@ -1,5 +1,6 @@
 out/*
-page/public/test/users?*.json
 data-*.json
+node_modules/
+public/
 
 !out/.gitkeep

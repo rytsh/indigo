@@ -1,5 +1,5 @@
 module indigo
 
-go 1.14
+go 1.15
 
-require github.com/fatih/color v1.9.0
+require github.com/fatih/color v1.10.0

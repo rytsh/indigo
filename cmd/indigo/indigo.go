@@ -221,8 +221,10 @@ func main() {
 		common.Color["Blue"].Println("Basic auth activated")
 	}
 
-	// listen key input
-	go reader.ReadKey()
+	if common.NoAPI == false && reader.TTY {
+		// listen key input
+		go reader.ReadKey()
+	}
 
 	// Start Serve
 	server.Serve(flagHost, flagPort)

@@ -4,8 +4,18 @@ import (
 	"fmt"
 	"indigo/internal/common"
 	"log"
+	"os"
 	"strings"
 )
+
+// TTY to check tty exist or not
+var TTY bool = false
+
+func init() {
+	if fileInfo, _ := os.Stdout.Stat(); (fileInfo.Mode() & os.ModeCharDevice) != 0 {
+		TTY = true
+	}
+}
 
 // ReadKey is a console input
 func ReadKey() {

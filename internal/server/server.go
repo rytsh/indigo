@@ -38,7 +38,7 @@ func setHandle() error {
 		mux.HandleFunc(&checkAll.FOLDER, FolderHandle(http.Dir(common.StaticFolder), &common.FolderPath))
 	}
 
-	if common.NoAPI && common.StaticFolder == "" {
+	if common.NoUI && common.NoAPI && common.StaticFolder == "" {
 		return fmt.Errorf("Nothing to serve")
 	}
 	return nil

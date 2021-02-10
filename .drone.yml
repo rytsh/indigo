@@ -4,7 +4,7 @@ name: default
 
 steps:
 - name: test
-  image: ryts/go:1.14
+  image: ryts/go:1.15
   environment:
     COVERALLS_TOKEN:
       from_secret: COVERALLS_TOKEN
@@ -17,7 +17,7 @@ steps:
     - push
 
 - name: build
-  image: ryts/go:1.14
+  image: ryts/go:1.15
   commands:
   - PLATFORMS="linux:amd64" ./build.sh --clean --build --build-context
   when:
@@ -25,7 +25,7 @@ steps:
     - tag
 
 - name: dockerhub
-  image: gcr.io/kaniko-project/executor:debug
+  image: ryts/kaniko-executor:debug-v1.3.0
   environment:
     DOCKER_REGISTRY:
       from_secret: DOCKER_REGISTRY
@@ -33,7 +33,10 @@ steps:
       from_secret: DOCKER_AUTH
   commands:
   - echo "{\"auths\":{\"$DOCKER_REGISTRY\":{\"auth\":\"$DOCKER_AUTH\"}}}" > /kaniko/.docker/config.json
-  - /kaniko/executor --context tar://out/context.tar.gz --dockerfile ci/run/Dockerfile --destination ryts:$(cat out/version) --destination ryts:latest
+  - ls
+  - pwd
+  - cat out/version
+  - /kaniko/executor --context tar://out/context.tar.gz --dockerfile ci/run/Dockerfile --destination ryts/indigo:$(cat out/version) --destination ryts/indigo:latest
   when:
     event:
     - tag

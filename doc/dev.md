@@ -6,7 +6,6 @@ Build tool
 
 ```shell
 PLATFORMS="windows:amd64,linux:arm64-amd64,darwin:amd64" ./build.sh --build --clean --pack
-./build.sh --publish-page
 ```
 
 Push commit to repo. `git push origin v0.x.y`

@@ -10,7 +10,14 @@ BASE_DIR="$(realpath $(dirname "$0"))"
 cd $BASE_DIR
 
 OUTPUT_FOLDER="${BASE_DIR}/out"
-VERSION="$(git describe --tags --abbrev=0)"
+
+# Droneio tag get
+if [[ -z ${DRONE_TAG} ]]; then
+    VERSION="$(git describe --tags --abbrev=0)"
+else
+    VERSION=${DRONE_TAG}
+fi
+
 MAINGO="${BASE_DIR}/cmd/indigo/indigo.go"
 FLAG_V="indigo/internal/common.Version=${VERSION}"
 
@@ -34,9 +41,6 @@ OPTIONS:
     Test code
     --cover
       Export coverage of test
-
-  --publish-page
-    Publish page directory in gh-pages branch
 
   --build-context
     Build context for image build
@@ -99,10 +103,6 @@ while [[ "$#" -gt 0 ]]; do
         ;;
     --clean)
         CLEAN="Y"
-        shift 1
-        ;;
-    --publish-page)
-        PUBLISH_PAGE="Y"
         shift 1
         ;;
     --build-context)
@@ -172,16 +172,6 @@ if [[ "${BUILD}" == "Y" ]]; then
         done
     done
     set +e
-fi
-
-# Publish Page
-if [[ "${PUBLISH_PAGE}" == "Y" ]]; then
-    (
-        cd page
-        echo "> Publish page started with ${VERSION}"
-        echo "LATEST_VERSION=${VERSION}" > .env
-        npm install && npm run build && npm run publish
-    )
 fi
 
 # Context for docker build
