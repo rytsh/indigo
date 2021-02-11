@@ -1,3 +1,3 @@
 # :notebook: Indigo Help Page
 
-Generate documentation run
+Generate documentation and publish run `./publish.sh`

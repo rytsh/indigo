@@ -3,7 +3,8 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
-import replace from '@rollup/plugin-replace';
+import del from 'rollup-plugin-delete'
+// import replace from '@rollup/plugin-replace';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -50,9 +51,11 @@ export default {
 			}
 		}),
 
-		process.env.LATEST_VERSION != "" && replace({
-			LATEST_VERSION: JSON.stringify(process.env.LATEST_VERSION),
-		}),
+		production && del({ targets: 'public/build/*', verbose: true, runOnce: true}),
+
+		// process.env.LATEST_VERSION != "" && replace({
+		// 	LATEST_VERSION: JSON.stringify(process.env.LATEST_VERSION),
+		// }),
 
 		// If you have external dependencies installed from
 		// npm, you'll most likely need these plugins. In

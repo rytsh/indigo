@@ -1,23 +1,54 @@
 <script>
-	import Code from "../component/Code.svelte";
-	import Title from "../component/Title.svelte";
-	let VERSION = LATEST_VERSION;
+  import Code from "../component/Code.svelte";
+  import Title from "../component/Title.svelte";
+  import Usage from "./Usage.svelte";
+  import { getData } from "../helper/version";
+
+  $: assets = {};
+  $: version = "";
+
+  (async ()=> {
+    const data = await getData();
+    version = data.tag_name;
+    data.assets.forEach(asset => {
+      const name = asset.name.split("-")
+      const [osName, arch] = [name[1], name[2]];
+      const info = {
+        name: asset.name,
+        arch: arch,
+        browser_download_url: asset.browser_download_url,
+      };
+      if (! assets[osName]) {
+        assets[osName] = [];
+      }
+      assets[osName].push(info);
+    });
+  })();
 </script>
 
 <p>Serve any json file with GET, POST, PUT, PATCH or DELETE request data, even most inner object and root path.</p>
 <p>Serve folder with SPA, browsable support options.</p>
 
 <Title id="installation">Installation</Title>
-<p>The most recent version of <b>indigo</b> is {VERSION}. Downloads are available on <a href="https://github.com/rytsh/indigo/releases/latest" target="_blank">GitHub</a>:</p>
+<p>The most recent version of <b>indigo</b> is {version}. Downloads are available on <a href="https://github.com/rytsh/indigo/releases/latest" target="_blank">GitHub</a>:</p>
 
 <ul>
-	<li>Linux 64-bit: <a href="https://github.com/rytsh/indigo/releases/latest/download/indigo-linux-amd64-{VERSION}.tar.gz">indigo-linux-amd64-{VERSION}.tar.gz</a> | <a href="https://github.com/rytsh/indigo/releases/latest/download/indigo-linux-arm64-{VERSION}.tar.gz">indigo-linux-arm64-{VERSION}.tar.gz</a></li>
-	<li>macOS 64-bit: <a href="https://github.com/rytsh/indigo/releases/latest/download/indigo-darwin-amd64-{VERSION}.tar.gz">indigo-darwin-amd64-{VERSION}.tar.gz</a></li>
-	<li>Windows 64-bit: <a href="https://github.com/rytsh/indigo/releases/latest/download/indigo-windows-amd64-{VERSION}.zip">indigo-windows-amd64-{VERSION}.zip</a></li>
+  {#each Object.entries(assets) as [osName, asset]}
+    <li>
+      <span class="font-code">
+        {osName.padEnd(10,'-')}| 
+      </span>
+      {#each asset as {browser_download_url, name}, i}
+        <a href={browser_download_url}>{name}</a>{(asset.length-1) > i ? " | " : ""}
+      {/each}
+    </li>
+  {/each}
 </ul>
 
-<p>Get in Linux amd64</p>
-<Code button code="curl -fsSL https://github.com/rytsh/indigo/releases/latest/download/indigo-linux-amd64-{VERSION}.tar.gz | sudo tar --overwrite -zx -C /usr/local/bin/"/>
+{#if assets["linux"]}
+  <p>Get in Linux amd64</p>
+  <Code button code={`curl -fsSL ${assets["linux"].find(val => val.arch == "amd64").browser_download_url} | sudo tar --overwrite -zx -C /usr/local/bin/`}/>
+{/if}
 
 <p>Run in <a href="https://hub.docker.com/r/ryts/indigo" target="_blank">docker</a></p>
 <Code button code="docker run --rm -it -p 3000:3000 ryts/indigo:latest https://rytsh.github.io/indigo/test/users.json"/>
@@ -70,136 +101,12 @@ Options:
 `}/>
 
 <p>s + enter will create a snapshot of the db on a new file.</p>
-
 <p>If same URL uses, order is UI &gt; API &gt; FILE</p>
-
 <p>Gzip compress can usable with <span class="color">Accept-Encoding: gzip</span> header set.</p>
-
-<Title id="examples">Examples</Title>
-
-<p>Give any json file to serve, could be a file or a URL</p>
-<Code code="$ indigo https://api.punkapi.com/v2/beers/1/"/>
-<p>Use REST API to get and change data event most inner object</p>
-<Code code={
-`$ curl localhost:3000/1/name
-
-Buzz`}/>
-
-<p>Serve api with basic auth</p>
-<Code code="$ indigo --auth-basic user:pass db.json"/>
-
-<p>Share just a folder</p>
-<Code code="$ indigo --folder ./public --no-api --no-ui"/>
-
-<p>Share just a folder with SPA</p>
-<Code code="$ indigo --folder ./public --no-api --no-ui --spa"/>
-
-<p>Share just a folder with just browsable support</p>
-<Code code="$ indigo --folder ./public --no-api --no-ui --browsable --no-index"/>
 
 <hr/>
 
-<Title id="examples-req" className="t2">Examples of using requests</Title>
-<p>Open a test json file</p>
-<Code code="$ indigo https://rytsh.github.io/indigo/test/users.json"></Code>
-
-<Title id="examples-get" className="t2">Get Request</Title>
-<Code wrap code={
-`$ curl http://localhost:3000
-
-{"users":[{"age":22,"hobies":["traveller","movies","sport","kahveci"],"id":1,"name":"Selin"},{"age":55,"hobies":["games","sci-fi","kamyoncu"],"id":"xx","name":"Eray"},{"age":52,"hobies":["cars","camping","fishing","job changer"],"id":2,"name":"Ali"},{"age":50,"hobies":["photography","scout","cooking","siemens"],"id":3,"name":"Sinem"},{"age":53,"hobies":["theater","costume","star","professional interviewer"],"id":4,"name":"Yasin"},{"age":44,"hobies":["mushrooms","swiming","planes","no hello no mello"],"id":5,"name":"Aysun"},{"age":67,"hobies":["cars","mars","koç koç"],"id":67,"name":"Utku"},{"age":49,"hobies":["gastronomi","literature","ege'nin incisi"],"id":6,"name":"Zeynep"},{"age":50,"hobies":["books","games","fast write"],"id":7,"name":"Cagatay"},{"age":50,"hobies":["painting","presentation","pasta"],"id":8,"name":"Cansu"}]}
-
-$ curl http://localhost:3000/users/1
-
-{"age":50,"hobies":["traveller","movies","sport"],"id":1,"name":"Selin"}
-
-$ curl http://localhost:3000/users/1/name
-
-Selin
-
-$ curl -s -H "Accept-Encoding: gzip" http://localhost:3000/users/5 | zcat
-
-{"age":44,"hobies":["mushrooms","swiming","planes"],"id":5,"name":"Aysun"}
-`}/>
-
-<Title id="examples-post" className="t2">Post Request</Title>
-<p>Append a new data to field. Post location should be an array.</p>
-<Code wrap code={
-`$ curl http://localhost:3000/users/1/hobies
-
-["traveller","movies","sport"]
-
-$ curl -d 'running' -X POST http://localhost:3000/users/1/hobies
-
-{"msg":"success"}
-
-$ curl http://localhost:3000/users/1/hobies
-
-["traveller","movies","sport","running"]
-`}/>
-
-<Title id="examples-put" className="t2">Put Request</Title>
-<Code wrap code={
-`$ curl http://localhost:3000/users/7
-
-{"age":50,"hobies":["books","games","fast write"],"id":7,"name":"Cagatay"}
-
-$ curl -d '{"outside": ["running"], "inside": ["movies"]}' -X PUT http://localhost:3000/users/7/hobies
-
-{"msg":"success"}
-
-$ curl http://localhost:3000/users/7
-
-{"age":50,"hobies":{"inside":["movies"],"outside":["running"]},"id":7,"name":"Cagatay"}
-
-$ curl http://localhost:3000/users/7/hobies/inside
-
-["movies"]
-`}/>
-
-<Title id="examples-patch" className="t2">Patch Request</Title>
-<p>Patch location and given data must be an object.</p>
-<Code wrap code={
-`$ curl http://localhost:3000/users/xx
-
-{"age":55,"hobies":["games","sci-fi","driver"],"id":"xx","name":"Eray"}
-
-$ curl -d '{"id": 100}' -X PATCH http://localhost:3000/users/xx
-
-{"msg":"success"}
-
-$ curl http://localhost:3000/users/xx
-
-{"err": "Not found!"}
-
-$ curl http://localhost:3000/users/100
-
-{"age":55,"hobies":["games","sci-fi","driver"],"id":100,"name":"Eray"}
-`}/>
-
-
-<Title id="examples-delete" className="t2">Delete Request</Title>
-<Code wrap code={
-`$ curl http://localhost:3000/users/8
-
-{"age":50,"hobies":["painting","presentation","pasta"],"id":8,"name":"Cansu"}
-
-$ curl -X DELETE http://localhost:3000/users/8/hobies
-
-{"msg":"success"}
-
-$ curl http://localhost:3000/users/8
-
-{"age":50,"id":8,"name":"Cansu"}
-
-$ curl -X DELETE http://localhost:3000
-
-{"msg":"success"}
-
-$ curl http://localhost:3000
-
-null
-`}/>
+<Usage version={version}/>
 
 <hr/>
 
@@ -209,4 +116,17 @@ null
 	.mail {
 		text-align: right;
 	}
+  .font-code {
+    font-family: monospace;
+    text-transform: capitalize;
+  }
+  li:nth-child(odd) {
+    background-color: #f9f9f9;
+  }
+  li:nth-child(even) {
+    background-color: #fcfcfc;
+  }
+  li:hover {
+    background-color: #ddd;
+  }
 </style>
