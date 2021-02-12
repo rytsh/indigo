@@ -11,7 +11,7 @@
             console.warn("failed copy");
         });
     }
-    if (!button) {
+    $: if (!button) {
         let lines = code.replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;").split('\n');
         code = "";
         for(var line = 0; line < lines.length; line++){
