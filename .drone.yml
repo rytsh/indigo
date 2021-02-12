@@ -33,9 +33,6 @@ steps:
       from_secret: DOCKER_AUTH
   commands:
   - echo "{\"auths\":{\"$DOCKER_REGISTRY\":{\"auth\":\"$DOCKER_AUTH\"}}}" > /kaniko/.docker/config.json
-  - ls
-  - pwd
-  - cat out/version
   - /kaniko/executor --context tar://out/context.tar.gz --dockerfile ci/run/Dockerfile --destination ryts/indigo:$(cat out/version) --destination ryts/indigo:latest
   when:
     event:

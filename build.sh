@@ -48,6 +48,9 @@ OPTIONS:
     Build docker image and publish to docker hub
     Auto enabled build-context
 
+  --changelog
+    Get change log
+
   --coveralls
     Run coveralls tool
 
@@ -128,6 +131,10 @@ while [[ "$#" -gt 0 ]]; do
         COVER="Y"
         shift 1
         ;;
+    --changelog)
+        CHANGELOG="Y"
+        shift 1
+        ;;
     -h | --help)
         usage
         exit 0
@@ -186,6 +193,23 @@ if [[ "${BUILD_DOCKER}" == "Y" ]]; then
     echo "> Build docker ${VERSION}"
     docker build -t ryts/indigo:${VERSION} -f ci/run/Dockerfile - < "${OUTPUT_FOLDER}/context.tar.gz"
     docker tag ryts/indigo:${VERSION} ryts/indigo:latest
+fi
+
+if [[ "${CHANGELOG}" == "Y" ]]; then
+    echo "# Changelog"
+
+    while IFS= read -r LOG; do
+        # take action on $line #
+        LOG_HASH=$(echo ${LOG} | cut -d ' ' -f 1)
+        LOG_MESSAGE=$(echo ${LOG} | cut -d ' ' -f 2-)
+        echo '`'${LOG_HASH}'`' ${LOG_MESSAGE}
+    done <<< $(git tag -l --sort=-refname | awk 'NR==2' | xargs -I {} git log --oneline --no-decorate {}..${VERSION})
+
+    echo ""
+    echo "# Docker Images"
+    echo '`'docker pull ryts/indigo:${VERSION}'`'
+    echo '`'docker pull ryts/indigo:latest'`'
+
 fi
 ###############
 # END
