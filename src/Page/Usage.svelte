@@ -1,5 +1,4 @@
 <script>
-    import Title from "../component/Title.svelte";
     import CLI from "./usages/CLI.svelte";
     import Req from "./usages/Requests.svelte";
     import Docker from "./usages/Docker.svelte";
@@ -76,5 +75,11 @@
         text-decoration: underline;
         background-color: #333;
         color: #fff;
+    }
+
+    @media (max-width: 500px) {
+        .button-group button {
+            font-size: unset;
+        }
     }
 </style>
